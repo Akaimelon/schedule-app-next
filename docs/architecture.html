@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>ひまわり予定表 技術設計解説書</title>
+<style>
+:root{
+  --ink:#2e2a24;
+  --ink-soft:#6b665d;
+  --ink-faint:#918b80;
+  --accent:#b8791f;
+  --accent-soft:#f3e5cd;
+  --line:#ddd6c9;
+  --line-soft:#ece6db;
+  --bg-tint:#fbf8f2;
+  --code-bg:#f6f3ec;
+  --blue:#2f5d8a;
+  --red:#a8412e;
+  --green:#4a6b3a;
+}
+
+@page{
+  size:A4;
+  margin:18mm 15mm 18mm 15mm;
+}
+
+*{box-sizing:border-box;}
+
+html{
+  font-size:10.2pt;
+}
+
+body{
+  margin:0;
+  font-family:"Yu Gothic UI","Yu Gothic","Meiryo","Noto Sans JP",sans-serif;
+  color:var(--ink);
+  line-height:1.75;
+  font-feature-settings:"palt" 1;
+  text-align:justify;
+  word-break:normal;
+  overflow-wrap:anywhere;
+  line-break:strict;
+}
+
+/* ============ 表紙 ============ */
+.cover{
+  height:255mm;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  page-break-after:always;
+  text-align:left;
+}
+.cover .eyebrow{
+  font-size:9pt;
+  letter-spacing:.28em;
+  color:var(--accent);
+  font-weight:700;
+  margin-bottom:10mm;
+}
+.cover h1{
+  font-size:30pt;
+  line-height:1.35;
+  margin:0 0 6mm;
+  font-weight:700;
+  letter-spacing:.01em;
+  border:none;
+  padding:0;
+}
+.cover .sub{
+  font-size:13pt;
+  color:var(--ink-soft);
+  margin:0 0 14mm;
+  line-height:1.7;
+}
+.cover .rule{
+  width:26mm;height:3px;background:var(--accent);margin-bottom:14mm;
+}
+.cover dl{
+  margin:0;
+  font-size:9.5pt;
+  color:var(--ink-soft);
+  display:grid;
+  grid-template-columns:26mm 1fr;
+  row-gap:2.6mm;
+}
+.cover dt{color:var(--ink-faint);}
+.cover dd{margin:0;color:var(--ink);}
+.cover .foot{
+  margin-top:auto;
+  font-size:8.5pt;
+  color:var(--ink-faint);
+}
+
+/* ============ 見出し ============ */
+h1{
+  font-size:17pt;
+  font-weight:700;
+  margin:0 0 7mm;
+  padding:0 0 3mm;
+  border-bottom:2.5px solid var(--accent);
+  page-break-after:avoid;
+  letter-spacing:.01em;
+}
+h1 .num{
+  color:var(--accent);
+  margin-right:.5em;
+  font-variant-numeric:tabular-nums;
+}
+h2{
+  font-size:12.5pt;
+  font-weight:700;
+  margin:9mm 0 3.5mm;
+  padding-left:3mm;
+  border-left:4px solid var(--accent);
+  page-break-after:avoid;
+  line-height:1.5;
+}
+h3{
+  font-size:10.8pt;
+  font-weight:700;
+  margin:6mm 0 2.5mm;
+  color:var(--ink);
+  page-break-after:avoid;
+  line-height:1.6;
+}
+h3::before{
+  content:"▸ ";
+  color:var(--accent);
+}
+h4{
+  font-size:10pt;
+  font-weight:700;
+  margin:4.5mm 0 2mm;
+  color:var(--ink-soft);
+  page-break-after:avoid;
+}
+.chapter{page-break-before:always;}
+
+p{margin:0 0 3.2mm;}
+
+/* ============ リスト ============ */
+ul,ol{margin:0 0 3.5mm;padding-left:5.5mm;}
+li{margin-bottom:1.6mm;}
+li>ul,li>ol{margin-top:1.6mm;margin-bottom:0;}
+
+/* ============ コード ============ */
+code{
+  font-family:"Consolas","MS Gothic",monospace;
+  font-size:8.8pt;
+  background:var(--code-bg);
+  padding:.5mm 1.2mm;
+  border-radius:2px;
+  color:var(--blue);
+  word-break:break-all;
+}
+pre{
+  font-family:"Consolas","MS Gothic",monospace;
+  font-size:8.3pt;
+  line-height:1.62;
+  background:var(--code-bg);
+  border:1px solid var(--line-soft);
+  border-left:3px solid var(--accent);
+  border-radius:3px;
+  padding:3mm 3.5mm;
+  margin:0 0 4mm;
+  white-space:pre-wrap;
+  word-break:break-word;
+  overflow-wrap:break-word;
+  text-align:left;
+  color:#3a3630;
+}
+pre code{
+  background:none;padding:0;color:inherit;font-size:inherit;
+}
+pre .c{color:#8a8478;}
+pre .k{color:#9b4f8e;}
+pre .s{color:#4a6b3a;}
+pre .hl{background:#fcefd4;}
+
+/* ============ 表 ============ */
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:8.8pt;
+  margin:0 0 4.5mm;
+  page-break-inside:avoid;
+  line-height:1.6;
+}
+th{
+  background:var(--bg-tint);
+  border:1px solid var(--line);
+  padding:1.8mm 2.2mm;
+  text-align:left;
+  font-weight:700;
+  color:var(--ink);
+  vertical-align:top;
+}
+td{
+  border:1px solid var(--line);
+  padding:1.8mm 2.2mm;
+  vertical-align:top;
+  text-align:left;
+}
+tbody tr:nth-child(even){background:#fdfcf9;}
+td code,th code{font-size:8.2pt;}
+
+/* ============ 装飾ブロック ============ */
+.note,.warn,.key{
+  border-radius:3px;
+  padding:3mm 3.5mm;
+  margin:0 0 4mm;
+  font-size:9.4pt;
+  page-break-inside:avoid;
+  line-height:1.7;
+}
+.note{background:var(--bg-tint);border:1px solid var(--line);}
+.warn{background:#fdf2ef;border:1px solid #eccfc7;border-left:3px solid var(--red);}
+.key{background:#fdf6e8;border:1px solid var(--accent-soft);border-left:3px solid var(--accent);}
+.note .lbl,.warn .lbl,.key .lbl{
+  display:block;font-weight:700;font-size:8.6pt;letter-spacing:.06em;margin-bottom:1.5mm;
+}
+.note .lbl{color:var(--ink-soft);}
+.warn .lbl{color:var(--red);}
+.key .lbl{color:var(--accent);}
+.note p:last-child,.warn p:last-child,.key p:last-child,
+.note ul:last-child,.warn ul:last-child,.key ul:last-child{margin-bottom:0;}
+
+blockquote{
+  margin:0 0 4mm;
+  padding:3mm 4mm;
+  background:var(--bg-tint);
+  border-left:3px solid var(--accent);
+  font-size:9.6pt;
+  color:var(--ink);
+}
+blockquote p:last-child{margin-bottom:0;}
+
+.flow{
+  font-family:"Consolas","MS Gothic",monospace;
+  font-size:8.2pt;
+  line-height:1.55;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:3px;
+  padding:3.5mm;
+  margin:0 0 4.5mm;
+  white-space:pre;
+  text-align:left;
+  page-break-inside:avoid;
+  color:var(--ink-soft);
+}
+
+.path{
+  font-family:"Consolas","MS Gothic",monospace;
+  font-size:8.4pt;
+  color:var(--blue);
+  background:#eef3f8;
+  padding:.4mm 1.2mm;
+  border-radius:2px;
+}
+
+strong{font-weight:700;color:#1f1c17;}
+
+hr{
+  border:none;border-top:1px solid var(--line-soft);margin:6mm 0;
+}
+
+/* ============ 目次 ============ */
+.toc{page-break-after:always;}
+.toc h1{margin-bottom:6mm;}
+.toc ol{
+  list-style:none;padding:0;margin:0;
+  counter-reset:toc;
+  font-size:10pt;
+}
+.toc li{
+  counter-increment:toc;
+  padding:2.2mm 0 2.2mm 11mm;
+  border-bottom:1px dotted var(--line);
+  position:relative;
+  margin:0;
+  line-height:1.5;
+}
+.toc li::before{
+  content:counter(toc,decimal-leading-zero);
+  position:absolute;left:0;top:2.2mm;
+  color:var(--accent);
+  font-weight:700;
+  font-family:"Consolas",monospace;
+  font-size:9.5pt;
+}
+.toc li .d{
+  display:block;font-size:8.5pt;color:var(--ink-faint);margin-top:.3mm;
+}
+
+.lead{
+  font-size:10.4pt;
+  color:var(--ink-soft);
+  margin:0 0 6mm;
+  padding-bottom:4mm;
+  border-bottom:1px solid var(--line-soft);
+  line-height:1.8;
+}
+
+.two-col-note{
+  display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin-bottom:4mm;
+}
+
+.tag{
+  display:inline-block;
+  font-size:7.6pt;
+  padding:.3mm 1.6mm;
+  border-radius:2px;
+  background:var(--accent-soft);
+  color:#8a5a14;
+  font-weight:700;
+  letter-spacing:.04em;
+  vertical-align:.4mm;
+  margin-right:1mm;
+}
+.tag.srv{background:#e3edf6;color:#2f5d8a;}
+.tag.cli{background:#e9f0e4;color:#4a6b3a;}
+</style>
+</head>
+<body>
+
+<!-- ========================= 表紙 ========================= -->
+<section class="cover">
+  <div class="eyebrow">TECHNICAL DESIGN DOCUMENT</div>
+  <h1>ひまわり予定表<br>技術設計解説書</h1>
+  <div class="rule"></div>
+  <p class="sub">コンポーネント・関数・Props・フック・API・データベース設計を<br>すべて分解し、使われている技術と設計思想を網羅的に解説する</p>
+  <dl>
+    <dt>プロジェクト</dt><dd>schedule-next</dd>
+    <dt>概要</dt><dd>療育施設の日程を管理する Web アプリケーション</dd>
+    <dt>スタック</dt><dd>Next.js 16 / React 19 / TypeScript / Prisma 7 / MySQL</dd>
+    <dt>作成日</dt><dd>2026年8月6日</dd>
+  </dl>
+  <div class="foot">本書はソースコード全ファイルを読み取り、実装に基づいて作成されています。</div>
+</section>
+
+<!-- ========================= 目次 ========================= -->
+<section class="toc">
+<h1>目次</h1>
+<ol>
+  <li>全体像 — このアプリは何層でできているか<span class="d">レイヤードアーキテクチャ／2本のサーバー経路</span></li>
+  <li>技術スタック一覧<span class="d">各ライブラリが何を解決しているか</span></li>
+  <li>データベース設計<span class="d">Child / Attendance / 認証テーブル / 制約とインデックス</span></li>
+  <li>Prisma のセットアップ<span class="d">シングルトン・Driver Adapter・fail-fast</span></li>
+  <li>サーバーロジック層<span class="d">Repository パターン / Service 層 / DTO</span></li>
+  <li>日付ロジック<span class="d">getWeeks の完全分解・タイムゾーン設計</span></li>
+  <li>バリデーション層（Zod）<span class="d">スキーマファースト・型の自動導出</span></li>
+  <li>認証とアクセス制御<span class="d">3重の防御・401と403・database 戦略</span></li>
+  <li>API ルート（Route Handler）<span class="d">処理順序の設計・構造化ログ</span></li>
+  <li>クライアント層<span class="d">Server/Client 境界・React Query・React Hook Form</span></li>
+  <li>型の流れ<span class="d">3つの源流と、それらを分けている理由</span></li>
+  <li>テスト<span class="d">純粋関数から書く理由・テストケースの選び方</span></li>
+  <li>ツール・設定まわり<span class="d">tsconfig / ESLint / Prettier / Prisma Config</span></li>
+  <li>未完成部分・改善点<span class="d">現状の課題と次の実装ステップ</span></li>
+  <li>まとめ<span class="d">この設計を一言で説明するなら</span></li>
+</ol>
+</section>
+
+<!-- ========================= 1 ========================= -->
+<section class="chapter">
+<h1><span class="num">01</span>全体像 — このアプリは何層でできているか</h1>
+
+<p class="lead">療育施設の予定表アプリです。データの流れは一方向で、責務ごとに層が分かれています。まずこの地図を頭に入れると、以降の各章がどこの話なのか迷わなくなります。</p>
+
+<div class="flow">[ブラウザ]
+  Client Component (ChildForm / ChildList)
+      ↓ fetch
+  React Query (キャッシュ層)
+      ↓ HTTP
+─────────────── サーバー境界 ───────────────
+  Route Handler (src/app/api/*/route.ts)   ← 認証・入力検証・HTTP の責務
+      ↓
+  Service (src/services/*)                 ← 業務ロジック・DTO 整形
+      ↓
+  Repository (src/repositories/*)          ← DB アクセスのみ
+      ↓
+  Prisma Client → MySQL / MariaDB</div>
+
+<h2>1-1. レイヤードアーキテクチャ</h2>
+
+<p>これは<strong>レイヤードアーキテクチャ（3層＋プレゼンテーション層）</strong>です。発想の核は「<strong>各層は自分の下の層しか知らない</strong>」ことにあります。</p>
+
+<table>
+<thead><tr><th style="width:16%">層</th><th style="width:42%">知っていること</th><th style="width:42%">知らないこと</th></tr></thead>
+<tbody>
+<tr><td>Route</td><td>HTTP、ステータスコード、セッション</td><td>SQL、Prisma のクエリ構文</td></tr>
+<tr><td>Service</td><td>業務ルール（ページング計算、DTO 整形）</td><td>HTTP、Request / Response オブジェクト</td></tr>
+<tr><td>Repository</td><td>Prisma のクエリ</td><td>業務ルール、HTTP</td></tr>
+</tbody>
+</table>
+
+<div class="key">
+<span class="lbl">なぜ分けるのか</span>
+<p><strong>テストしやすさと差し替えやすさ</strong>のためです。Service は <code>Request</code> を受け取らないので、テストで HTTP を用意しなくても直接呼べます。DB を PostgreSQL に変えても Repository だけ直せば済みます。逆に「全部 route.ts に書く」と、テストのたびに HTTP と DB の両方を用意する必要が出てきます。</p>
+</div>
+
+<h2>1-2. サーバーへの道が2本ある</h2>
+
+<p>App Router 特有の重要な点として、このアプリには<strong>サーバーのデータに到達する経路が2本</strong>あります。</p>
+
+<table>
+<thead><tr><th style="width:24%">経路</th><th style="width:38%">通り道</th><th style="width:38%">使っている箇所</th></tr></thead>
+<tbody>
+<tr><td><strong>Server Component 経由</strong></td><td>HTTP を通らず、サーバー上で直接関数を呼ぶ</td><td><span class="path">page.tsx</span> の <code>auth()</code></td></tr>
+<tr><td><strong>API Route 経由</strong></td><td>ブラウザから <code>fetch</code> で HTTP リクエスト</td><td><code>/api/children</code>、<code>/api/attendances</code></td></tr>
+</tbody>
+</table>
+
+<p>「サーバーで直接読める」のに、なぜ API も用意しているのか。理由は<strong>更新後の再取得</strong>です。児童を追加した直後に一覧を更新したいとき、Server Component だとページ全体の再読み込みが必要になります。API＋React Query なら、一覧部分だけを裏で差し替えられます。「初回表示はサーバー、以降の更新はクライアント」という使い分けです。</p>
+</section>
+
+<!-- ========================= 2 ========================= -->
+<section class="chapter">
+<h1><span class="num">02</span>技術スタック一覧</h1>
+
+<p class="lead">それぞれのライブラリが「どんな問題を解決するために入っているのか」を押さえます。名前を挙げるだけでなく、なぜ必要かを言えることが重要です。</p>
+
+<table>
+<thead><tr><th style="width:26%">技術</th><th style="width:20%">分類</th><th style="width:54%">解決している問題</th></tr></thead>
+<tbody>
+<tr><td><strong>Next.js 16</strong></td><td>フレームワーク</td><td>App Router によるサーバー／クライアント統合、ルーティング、ビルド最適化</td></tr>
+<tr><td><strong>React 19</strong></td><td>UI ライブラリ</td><td>宣言的UI。Server Components と Server Actions を提供</td></tr>
+<tr><td><strong>TypeScript</strong></td><td>言語</td><td>ビルド時の型検査。<code>strict: true</code> で null 安全も担保</td></tr>
+<tr><td><strong>Prisma 7</strong></td><td>ORM</td><td>スキーマからの型生成、マイグレーション管理、SQL インジェクション対策</td></tr>
+<tr><td><strong>@prisma/adapter-mariadb</strong></td><td>DB ドライバ</td><td>Rust エンジン不要の JS ドライバ接続（Driver Adapter 方式）</td></tr>
+<tr><td><strong>Auth.js (next-auth v5)</strong></td><td>認証</td><td>GitHub OAuth、セッション管理。パスワードを自前で持たない</td></tr>
+<tr><td><strong>@auth/prisma-adapter</strong></td><td>認証</td><td>Auth.js のセッション保存先を Prisma に接続するアダプター</td></tr>
+<tr><td><strong>Zod 4</strong></td><td>検証</td><td>実行時バリデーション＋型の自動導出。外部入力の安全化</td></tr>
+<tr><td><strong>TanStack Query 5</strong></td><td>状態管理</td><td>サーバー状態のキャッシュ、再取得、ローディング／エラー管理</td></tr>
+<tr><td><strong>React Hook Form 7</strong></td><td>フォーム</td><td>非制御コンポーネントによる高速なフォーム。再レンダリング最小化</td></tr>
+<tr><td><strong>@hookform/resolvers</strong></td><td>接続</td><td>React Hook Form と Zod をつなぐアダプター</td></tr>
+<tr><td><strong>Sonner</strong></td><td>UI</td><td>トースト通知。成功／失敗のフィードバック</td></tr>
+<tr><td><strong>Tailwind CSS 4</strong></td><td>スタイル</td><td>ユーティリティクラスによるスタイリング。未使用CSSの自動削除</td></tr>
+<tr><td><strong>Vitest 4</strong></td><td>テスト</td><td>Vite ベースの高速なユニットテスト実行環境</td></tr>
+<tr><td><strong>Prettier / ESLint</strong></td><td>品質</td><td>フォーマット統一と静的解析</td></tr>
+</tbody>
+</table>
+
+<div class="note">
+<span class="lbl">構成の特徴</span>
+<p><strong>「アダプター」が3つ入っている</strong>のがこの構成の性格をよく表しています。<code>PrismaAdapter</code>（Auth.js↔Prisma）、<code>PrismaMariaDb</code>（Prisma↔MariaDB）、<code>zodResolver</code>（RHF↔Zod）。それぞれのライブラリが特定の相手に依存せず、<strong>インターフェースだけを決めて実装を差し込める</strong>設計になっているため、後から差し替えが効きます。</p>
+</div>
+</section>
+
+<!-- ========================= 3 ========================= -->
+<section class="chapter">
+<h1><span class="num">03</span>データベース設計</h1>
+
+<p class="lead">ファイル：<span class="path">prisma/schema.prisma</span>。ここでの設計判断は、後から変更するコストが最も高い部分です。制約をどこまで DB に持たせるかが焦点になります。</p>
+
+<h2>3-1. テーブル一覧</h2>
+
+<table>
+<thead><tr><th style="width:28%">モデル</th><th style="width:44%">役割</th><th style="width:28%">出所</th></tr></thead>
+<tbody>
+<tr><td><code>Child</code></td><td>児童のマスタデータ</td><td>自作</td></tr>
+<tr><td><code>Attendance</code></td><td>「誰が・いつ・どう来るか」の予定</td><td>自作</td></tr>
+<tr><td><code>TimeFrame</code> (enum)</td><td>午前 / 午後</td><td>自作</td></tr>
+<tr><td><code>User</code> / <code>Account</code> / <code>Session</code> / <code>VerificationToken</code></td><td>認証</td><td>Auth.js 標準スキーマ</td></tr>
+</tbody>
+</table>
+
+<h2>3-2. Child モデル</h2>
+
+<pre><code>model Child {
+  id               Int          @id @default(autoincrement())
+  name             String
+  contractDays     Int          @default(0)
+  color            String
+  sortOrder        Int          @default(0)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  defaultTimeFrame TimeFrame?
+  attendances      Attendance[]
+}</code></pre>
+
+<h3>sortOrder — 並び順をユーザーが決める</h3>
+<p>「並び順をユーザー側で制御できるようにする」ための定番パターンです。<code>id</code> 順や <code>name</code> 順では現場の都合（学年順、クラス順など）に合いません。整数で持たせ、<code>orderBy: { sortOrder: "asc" }</code> でソートします。</p>
+
+<h3>color — DB に見た目を持たせる判断</h3>
+<p>カレンダー上で児童を色で識別するため。一見「見た目の情報を DB に置くのはおかしい」と思えますが、これは<strong>その児童固有の属性</strong>なので妥当です。「テーマカラー」のようなアプリ全体の設定とは性質が違います。</p>
+
+<h3>createdAt / updatedAt — 監査カラム</h3>
+<p><strong>監査カラム（audit columns）</strong>と呼ばれる定番です。<code>@default(now())</code> は挿入時に、<code>@updatedAt</code> は Prisma が更新時に自動でセットします。SQL のトリガーを書く必要がありません。</p>
+
+<h3>defaultTimeFrame TimeFrame? — nullable</h3>
+<p><code>?</code> が nullable を意味します。「この子はいつも午前」というデフォルトを持たせ、<code>Attendance</code> 作成時の初期値に使う意図です。</p>
+
+<h3>attendances Attendance[] — 実在しないカラム</h3>
+<p>これは<strong>実際のカラムではありません</strong>。Prisma のリレーションフィールドで、<code>include: { attendances: true }</code> と書けるようにするための「仮想フィールド」です。DB のテーブルには存在しません。</p>
+
+<h2>3-3. Attendance モデル — 設計上いちばん見どころのある部分</h2>
+
+<pre><code>model Attendance {
+  id        Int        @id @default(autoincrement())
+  date      DateTime   @db.Date
+  childId   Int
+  child     Child      @relation(fields: [childId], references: [id], onDelete: Cascade)
+  timeFrame TimeFrame?
+  pickup    Boolean    @default(false)
+  dropoff   Boolean    @default(false)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@unique([date, childId])
+  @@index([date])
+}</code></pre>
+
+<h3>@db.Date — 型でドメインを表現する</h3>
+<p>Prisma のデフォルトは <code>DATETIME</code>（時刻付き）ですが、<code>@db.Date</code> で MySQL の <code>DATE</code> 型（時刻なし）にしています。<strong>「予定は日付単位であって時刻ではない」というドメインの性質を、型で表現</strong>しています。これによりタイムゾーンによる時刻ずれの余地が減ります（完全には消えません。第6章で詳述）。</p>
+
+<h3>@@unique([date, childId]) — 複合ユニーク制約</h3>
+<p><strong>「1人の児童は1日につき1レコードしか持てない」というビジネスルールを、DB レベルで強制</strong>しています。</p>
+
+<div class="key">
+<span class="lbl">なぜアプリ側のチェックでは不十分か</span>
+<p>アプリ側で <code>if (既にあるか?)</code> とチェックしても、<strong>2つのリクエストが同時に来ると両方すり抜けます</strong>（レースコンディション）。チェックと挿入の間に、別のリクエストが挿入してしまうためです。DB のユニーク制約は原子的なので、すり抜けられません。</p>
+</div>
+
+<p>さらにこの制約は <strong><code>upsert</code> の鍵</strong>にもなります。</p>
+
+<pre><code>prisma.attendance.upsert({
+  where: { date_childId: { date, childId } },  // ← @@unique が生成した複合キー名
+  create: { ... },
+  update: { ... },
+})</code></pre>
+
+<p>「チェックボックスを押したら、なければ作る・あれば更新する」という予定表アプリに必須の操作が、<strong>1クエリ</strong>で書けます。SELECT してから分岐する必要がありません。</p>
+
+<h3>@@index([date]) — 範囲検索の高速化</h3>
+<p><span class="path">attendanceRepository.ts</span> の <code>where: { date: { gte: start, lt: end } }</code> という<strong>範囲検索を高速化</strong>するためのインデックスです。これがないと全行スキャン（フルテーブルスキャン）になります。B-Tree インデックスは範囲検索が得意なので、月単位の取得にぴったりです。</p>
+
+<h3>onDelete: Cascade — 参照整合性を DB に任せる</h3>
+<p>児童を削除したら、その子の予定も自動で消えます。アプリ側で「先に attendance を消してから child を消す」という手順を書かなくて済み、書き忘れによる<strong>孤児レコード（orphan record）</strong>も発生しません。</p>
+
+<h3>pickup / dropoff を Boolean 2本に分けた理由</h3>
+<p><code>transportType: "PICKUP" | "DROPOFF" | "BOTH" | "NONE"</code> という enum にもできますが、Boolean 2本のほうが<strong>UI のチェックボックス2つと 1:1 で対応</strong>し、組み合わせが増えても破綻しません。<strong>UI の操作単位とデータモデルを一致させる</strong>判断です。</p>
+
+<h2>3-4. 認証テーブル（Auth.js 標準スキーマ）</h2>
+
+<p><code>User</code> / <code>Account</code> / <code>Session</code> / <code>VerificationToken</code> は、<strong>Auth.js の Prisma Adapter が要求する固定スキーマ</strong>です。自分で設計したものではなく「規約に合わせた」ものです。</p>
+
+<h3>Account の複合主キー</h3>
+<pre><code>@@id([provider, providerAccountId])</code></pre>
+<p>「GitHub の ID 12345」という組み合わせで一意になります。この設計により、<strong>1人の <code>User</code> が GitHub と Google の両方を紐付けられます</strong>（アカウントリンキング）。</p>
+
+<h3>トークン列が @db.Text である理由</h3>
+<p><code>refresh_token</code> / <code>access_token</code> / <code>id_token</code> はすべて <code>@db.Text</code> です。OAuth のトークン、特に JWT である <code>id_token</code> は数百〜数千文字になります。MySQL における Prisma のデフォルト <code>VARCHAR(191)</code> では入りきらないため、<code>TEXT</code> に拡張しています。Auth.js のドキュメントに明記されている<strong>必須対応</strong>です。</p>
+
+<h3>ここだけ snake_case である理由</h3>
+<p>他が camelCase なのに <code>refresh_token</code> だけスネークケースなのは、<strong>OAuth 2.0 の仕様書のフィールド名をそのまま使っている</strong>ためです。Auth.js の規約であり、変更できません。</p>
+
+<h3>session: { strategy: "database" } — 戦略の選択</h3>
+
+<table>
+<thead><tr><th style="width:24%"></th><th style="width:38%">JWT 戦略</th><th style="width:38%">database 戦略（採用）</th></tr></thead>
+<tbody>
+<tr><td>保存場所</td><td>Cookie の中（署名付き）</td><td>DB の <code>Session</code> テーブル</td></tr>
+<tr><td>DB アクセス</td><td>不要（速い）</td><td>毎回必要</td></tr>
+<tr><td>即時失効</td><td>できない（有効期限まで有効）</td><td><strong>DB の行を消せば即ログアウト</strong></td></tr>
+<tr><td>スケール</td><td>得意（ステートレス）</td><td>DB が単一障害点になりうる</td></tr>
+</tbody>
+</table>
+
+<div class="key">
+<span class="lbl">なぜ database 戦略が正しいか</span>
+<p>このアプリは <code>approved</code> フラグによる<strong>承認制</strong>です。「承認を取り消したら即座に使えなくする」ことが要件になります。JWT 戦略だとトークンの有効期限が切れるまで使い続けられてしまうため、database 戦略が必然的な選択になります。</p>
+</div>
+
+<h3>User.approved — 標準スキーマへの独自拡張</h3>
+<pre><code>approved Boolean @default(false)</code></pre>
+<p>Auth.js の標準スキーマに<strong>自分で追加したフィールド</strong>です。GitHub でログインできても、管理者が <code>approved = true</code> にするまで使えません。<strong>招待制／ホワイトリスト方式</strong>であり、療育施設という個人情報を扱うアプリとして妥当な設計です。</p>
+
+<h2>3-5. マイグレーション履歴</h2>
+
+<div class="flow">20260802163315_add_child_table
+20260803044839_add_auth_tables
+20260806064057_add_attendance
+20260806064652_npx_prisma_generate</div>
+
+<p><strong>マイグレーション履歴</strong>によるスキーマのバージョン管理です。タイムスタンプ順に SQL が積み上がり、<code>prisma migrate deploy</code> で本番環境に同じ順序で適用されます。Git のコミット履歴と同じ発想で、<strong>スキーマの変更が再現可能</strong>になります。「開発環境と本番でテーブル定義が違う」という事故を防ぎます。</p>
+</section>
+
+<!-- ========================= 4 ========================= -->
+<section class="chapter">
+<h1><span class="num">04</span>Prisma のセットアップ</h1>
+
+<p class="lead">ファイル：<span class="path">src/lib/prisma.ts</span>。わずか十数行ですが、5つの技術要素が詰まった Next.js × Prisma の定番イディオムです。</p>
+
+<pre><code>const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error("DATABASE_URL is not set");
+}
+
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({ adapter: new PrismaMariaDb(connectionString) });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}</code></pre>
+
+<h2>4-1. シングルトンパターン</h2>
+<p><code>PrismaClient</code> は内部に<strong>コネクションプール</strong>を持ちます。インスタンスを何個も作ると DB への接続数が爆発し、<code>Too many connections</code> エラーになります。だからアプリ全体で 1 つだけにします。</p>
+
+<h2>4-2. globalThis へのキャッシュ</h2>
+<p>開発中の <strong>HMR（Hot Module Replacement）</strong> は、ファイルを保存するたびにモジュールを再評価します。普通にモジュールスコープで <code>new PrismaClient()</code> すると、保存のたびに新しいクライアントが増え続けます。</p>
+<p><code>globalThis</code> は HMR でもリセットされないため、そこに退避させます。<code>if (NODE_ENV !== "production")</code> で本番を除外しているのは、本番には HMR がなく、グローバル汚染を避けたいからです。</p>
+
+<h2>4-3. as unknown as — 二段キャスト</h2>
+<p><code>globalThis</code> の型に <code>prisma</code> プロパティは存在しないので、TypeScript は直接のキャストを拒否します。一度 <code>unknown</code> を経由することで強制的に型を付ける<strong>エスケープハッチ</strong>です。乱用は禁物ですが、この用途では標準的な書き方です。</p>
+
+<h2>4-4. ?? — Null 合体演算子</h2>
+<p><code>||</code> ではなく <code>??</code> を使うのは、<code>||</code> だと <code>0</code> や <code>""</code> も右辺に流れてしまうためです。「null / undefined のときだけ」という意図を正確に表現します。</p>
+
+<h2>4-5. Driver Adapter</h2>
+<p>Prisma 6 まではネイティブの Rust エンジンが DB に接続していました。Prisma 7 では <strong>Driver Adapter</strong> 方式が主流で、JS のドライバ（ここでは MariaDB 用）を差し込みます。Rust バイナリが不要になり、Edge ランタイムやサーバーレス環境で動かしやすくなります。</p>
+
+<h2>4-6. fail-fast — 起動時に落とす</h2>
+<pre><code>if (!connectionString) throw new Error("DATABASE_URL is not set");</code></pre>
+<p>環境変数がなければ<strong>モジュール読み込み時点で落とします</strong>。リクエストが来てから「undefined に接続できません」という謎のエラーが出るより、起動時に明確なメッセージで落ちるほうが、原因特定が圧倒的に速くなります。これを <strong>fail-fast</strong> と呼びます。</p>
+</section>
+
+<!-- ========================= 5 ========================= -->
+<section class="chapter">
+<h1><span class="num">05</span>サーバーロジック層</h1>
+
+<h2>5-1. Repository 層</h2>
+<p>ファイル：<span class="path">src/repositories/</span></p>
+
+<pre><code>// childRepository.ts
+export function createChild(data: Prisma.ChildCreateInput) {
+  return prisma.child.create({ data });
+}
+export function findChildren({ skip, take }: { skip: number; take: number }) {
+  return prisma.child.findMany({ skip, take, orderBy: { sortOrder: "asc" } });
+}
+export function countChildren() {
+  return prisma.child.count();
+}</code></pre>
+
+<h3>Repository パターン</h3>
+<p>「<strong>DB アクセスをここに閉じ込める</strong>」という発想です。Service 層に <code>prisma.child.findMany(...)</code> を直接書かないことで、次の利点が得られます。</p>
+<ul>
+<li>SQL / Prisma の知識が 1 ファイルに集約される</li>
+<li>テストで Repository をモックすれば、Service を DB なしでテストできる</li>
+<li>ORM を差し替えても Service は無傷</li>
+<li>「この操作、どこで使われている？」が追いやすい</li>
+</ul>
+
+<h3>async / await を書いていない</h3>
+<pre><code>export function createChild(...) {          // async ではない
+  return prisma.child.create({ data });     // Promise をそのまま返す
+}</code></pre>
+<p><code>await</code> して <code>return</code> するのではなく、<strong>Promise をそのまま返して</strong>います（pass-through）。<code>async function</code> にすると Promise を余計に1段包む処理が入るだけで、意味は同じです。中で <code>await</code> の結果を加工しないなら、この書き方が簡潔です。</p>
+
+<h3>オブジェクト引数（名前付き引数）</h3>
+<p><code>findChildren({ skip, take })</code> のようにオブジェクトで受け取っています。<code>findChildren(0, 20)</code> だと呼び出し側で「どっちが skip だっけ」となります。オブジェクトなら<strong>名前付き引数</strong>として読め、引数の順番を間違えません。引数が2個以上ならこちらが推奨されます。</p>
+
+<h3>Prisma.ChildCreateInput の利用</h3>
+<p>自分で <code>{ name: string; color: string; ... }</code> と型を書かず、<strong>Prisma が生成した型</strong>を使っています。スキーマを変えれば型も自動で追従するので、型定義の二重管理がなくなります。</p>
+
+<h2>5-2. Service 層</h2>
+<p>ファイル：<span class="path">src/services/childService.ts</span></p>
+
+<pre><code>export async function getChildList({ page, limit }) {
+  const skip = (page - 1) * limit;
+  const [childList, total] = await Promise.all([
+    findChildren({ skip, take: limit }),
+    countChildren(),
+  ]);
+
+  const data = childList.map((child) =&gt; ({
+    id: child.id, name: child.name, color: child.color,
+    contractDays: child.contractDays, sortOrder: child.sortOrder,
+  }));
+
+  return { data, page, limit, total, totalPages: Math.ceil(total / limit) };
+}</code></pre>
+
+<p>この短い関数に4つの技術が入っています。</p>
+
+<h3>(1) オフセットページネーション</h3>
+<p><code>skip = (page - 1) * limit</code> という式が本体です。<code>page=1</code> なら skip 0、<code>page=3, limit=20</code> なら skip 40。SQL の <code>LIMIT 20 OFFSET 40</code> に対応します。</p>
+
+<table>
+<thead><tr><th style="width:24%">方式</th><th style="width:38%">長所</th><th style="width:38%">短所</th></tr></thead>
+<tbody>
+<tr><td><strong>オフセット（採用）</strong></td><td>実装が簡単。「3ページ目に飛ぶ」ができる</td><td>深いページ（OFFSET 100000）は DB が読み飛ばす行が増えて遅い</td></tr>
+<tr><td>カーソル</td><td>何ページ目でも高速</td><td>「N ページ目にジャンプ」ができない</td></tr>
+</tbody>
+</table>
+
+<p>児童数が数十〜数百のこのアプリなら、オフセットで十分という判断です。</p>
+
+<h3>(2) Promise.all による並列化</h3>
+<pre><code>const [childList, total] = await Promise.all([findChildren(...), countChildren()]);</code></pre>
+<p>「一覧取得」と「総件数カウント」は<strong>互いに依存しない</strong>ので同時に投げます。順番に await すると 50ms + 30ms = 80ms、並列なら max(50, 30) = 50ms です。</p>
+
+<div class="note">
+<span class="lbl">await を2行並べた場合との違い</span>
+<pre style="margin-bottom:0;background:#fff;"><code>const a = await findChildren(...);   // 完了を待ってから
+const b = await countChildren();     // ようやく開始 ← 直列になる</code></pre>
+</div>
+
+<h3>(3) DTO への変換 — 明示的なフィールド選択</h3>
+<p>Prisma の返り値には <code>createdAt</code> / <code>updatedAt</code> も含まれますが、<strong>明示的に必要なフィールドだけ詰め替えて</strong>返しています。これを <strong>DTO（Data Transfer Object）</strong> と呼びます。目的は3つです。</p>
+
+<ul>
+<li><strong>情報漏洩の防止</strong> — DB カラムを増やしたときに、意図せず API から漏れるのを防ぐ。今は無害でも、将来 <code>Child</code> に <code>medicalNote</code> を足したら自動的に外に出てしまう</li>
+<li><strong>API 契約の安定</strong> — DB スキーマが変わっても API のレスポンス形が変わらない</li>
+<li><strong>型の明示</strong> — <span class="path">types/api.ts</span> の <code>Child</code> 型と 1:1 で対応する</li>
+</ul>
+
+<div class="key">
+<span class="lbl">これは意識的な設計判断です</span>
+<p>「Prisma の結果をそのまま <code>Response.json()</code> する」のが一番楽ですが、あえてやっていません。<strong>DB のスキーマと API のスキーマを切り離す</strong>という判断です。</p>
+</div>
+
+<h3>(4) メタ情報つきレスポンス</h3>
+<pre><code>{ data, page, limit, total, totalPages }</code></pre>
+<p>配列を裸で返さず、<strong><code>data</code> でラップしてメタ情報を添えて</strong>います。クライアントは <code>totalPages</code> を見てページャを描画できます。裸の配列で返すと、後からメタ情報を足したくなったときに<strong>破壊的変更</strong>になります。</p>
+<p><code>totalPages: Math.ceil(total / limit)</code> は端数の切り上げです。25件を20件ずつなら2ページになります。</p>
+
+<h2>5-3. attendanceService</h2>
+
+<pre><code>export async function getMonthlyAttendances({ year, month }) {
+  const attendances = await findAttendancesByMonth(year, month);
+  return attendances.map((a) =&gt; ({
+    date: toStr(a.date),   // Date → "YYYY-MM-DD" 文字列に変換
+    childId: a.childId, timeFrame: a.timeFrame,
+    pickup: a.pickup, dropoff: a.dropoff,
+  }));
+}</code></pre>
+
+<p>ここでの重要な発想は <strong><code>Date</code> を文字列に変換して返す</strong>ことです。</p>
+<p>JSON には Date 型が存在しないので、そのまま渡すと <code>"2026-08-06T00:00:00.000Z"</code> という ISO 文字列になり、クライアントで再パースが必要になります。<code>"2026-08-06"</code> にしておけば、クライアントは<strong>文字列比較だけで日付を照合</strong>でき、タイムゾーンの罠を踏みません。</p>
+<p>カレンダー側では <code>Map</code> のキーとして <code>"2026-08-06_3"</code>（日付_childId）のような形で引ける設計になります。</p>
+</section>
+
+<!-- ========================= 6 ========================= -->
+<section class="chapter">
+<h1><span class="num">06</span>日付ロジック</h1>
+
+<p class="lead">ファイル：<span class="path">src/lib/date.ts</span>。このアプリで最も複雑で、最も説明しづらい部分です。ここを説明できれば全体の理解が伝わります。</p>
+
+<h2>6-1. toStr — ローカル日付を YYYY-MM-DD に</h2>
+
+<pre><code>export function toStr(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}</code></pre>
+
+<table>
+<thead><tr><th style="width:30%">要素</th><th style="width:70%">意味</th></tr></thead>
+<tbody>
+<tr><td><code>getMonth() + 1</code></td><td>JS の <code>getMonth()</code> は<strong>0始まり</strong>（0=1月、11=12月）。人間向けには +1 が必要。JS 最大級の罠</td></tr>
+<tr><td><code>padStart(2, "0")</code></td><td><code>8</code> → <code>"08"</code>。ゼロ埋めしないと文字列ソートが壊れる（<code>"2026-10-01" &lt; "2026-8-01"</code> になる）</td></tr>
+<tr><td><code>getFullYear</code></td><td><code>getYear()</code>（非推奨、1900年起点）ではない正しい方</td></tr>
+</tbody>
+</table>
+
+<div class="warn">
+<span class="lbl">なぜ toISOString() を使わないのか</span>
+<p><code>toISOString()</code> は <strong>UTC に変換</strong>します。日本時間（UTC+9）で <code>2026-08-06 00:00 JST</code> を <code>toISOString()</code> すると <code>"2026-08-05T15:00:00Z"</code> になり、<strong>前日の日付</strong>になってしまいます。<br>
+<strong>鉄則：画面に表示する日付には、必ずローカル系の <code>getFullYear</code> / <code>getMonth</code> / <code>getDate</code> を使う。</strong></p>
+</div>
+
+<h2>6-2. getWeeks — カレンダーの心臓部</h2>
+
+<pre><code>export function getWeeks(year: number, month: number): (Date | null)[][] {
+  const weeks = new Map&lt;string, (Date | null)[]&gt;();
+  const date = new Date(year, month, 1);
+
+  while (date.getMonth() === month) {
+    const dayOfWeek = date.getDay();
+    if (dayOfWeek &gt;= 1 &amp;&amp; dayOfWeek &lt;= 5) {
+      const monday = new Date(date);
+      monday.setDate(date.getDate() - (dayOfWeek - 1));
+      const weekKey = toStr(monday);
+
+      let week = weeks.get(weekKey);
+      if (!week) {
+        week = [null, null, null, null, null];
+        weeks.set(weekKey, week);
+      }
+      week[dayOfWeek - 1] = new Date(date);
+    }
+    date.setDate(date.getDate() + 1);
+  }
+  return [...weeks.values()];
+}</code></pre>
+
+<h3>何をする関数か</h3>
+<p>「2026年8月」を渡すと、<strong>平日（月〜金）だけを週ごとにまとめた2次元配列</strong>を返します。</p>
+
+<div class="flow">[
+  [null,  null,  8/5,  8/6,  8/7 ],   ← 8/1 が土曜始まりなので月・火は前月 → null
+  [8/10,  8/11,  8/12, 8/13, 8/14],
+  [8/17,  8/18,  8/19, 8/20, 8/21],
+  ...
+]</div>
+
+<h3>① グルーピングキーの正規化 — 最重要のアイデア</h3>
+
+<p>「同じ週かどうか」をどう判定するか。答えは「<strong>その日が属する週の月曜日を計算し、それをキーにする</strong>」です。</p>
+
+<pre><code>monday = date - (dayOfWeek - 1) 日</code></pre>
+
+<p><code>dayOfWeek</code> は 月=1, 火=2 … 金=5。水曜（3）なら 3-1=2 日戻して月曜、木曜（4）なら 3 日戻す。<strong>同じ週の日は全員、同じ月曜日に着地します</strong>。だから <code>toStr(monday)</code> が完璧なグルーピングキーになります。</p>
+
+<div class="key">
+<span class="lbl">これは汎用テクニックです</span>
+<p>SQL の <code>GROUP BY</code> や lodash の <code>groupBy</code> と同じ発想で、「<strong>分類したいものから、分類のキーを計算で導出する</strong>」というパターンです。週だけでなく「四半期」「時間帯」など、あらゆるグルーピングに応用できます。</p>
+</div>
+
+<h3>② Map の挿入順序保証</h3>
+<p><code>Map</code> は<strong>キーが挿入された順序を保持</strong>します（プレーンオブジェクトは整数風キーが先頭に並び替わるため使えません）。日付を1日ずつ昇順に走査しているので、週も自動的に時系列順に並びます。だから最後に <code>[...weeks.values()]</code> するだけでソート処理が不要です。</p>
+
+<h3>③ 固定長5の配列で「穴」を表現する</h3>
+<pre><code>week = [null, null, null, null, null];
+week[dayOfWeek - 1] = new Date(date);</code></pre>
+
+<p>新しい週を作るとき、<strong>先に null で5マス埋めておきます</strong>。そして曜日をそのままインデックスに使います（月=index 0、金=index 4）。</p>
+
+<p>これにより、月初が水曜なら index 0, 1 が <code>null</code> のまま残り、<strong>カレンダーの空セルが自然に表現されます</strong>。</p>
+
+<div class="warn">
+<span class="lbl">push で詰めると壊れる</span>
+<p><code>week.push(date)</code> で詰めていく実装だと、月初が水曜のとき水曜が index 0 に来てしまい、<strong>表示が2マス左にずれます</strong>。「曜日 → 配列インデックス」という位置の対応を維持することがこのロジックのキモです。</p>
+</div>
+
+<h3>④ Date のミューテーションによるループ</h3>
+<pre><code>const date = new Date(year, month, 1);
+while (date.getMonth() === month) {
+  ...
+  date.setDate(date.getDate() + 1);
+}</code></pre>
+
+<p><code>setDate()</code> は<strong>桁あふれを自動処理</strong>します。8月31日に <code>setDate(32)</code> すると、勝手に9月1日になります。だから「その月が何日あるか」を計算する必要がなく、<strong>うるう年も自動対応</strong>します。終了条件が <code>getMonth() === month</code> なのは、この性質を利用しているためです。</p>
+
+<div class="warn">
+<span class="lbl">参照 vs 値 — 典型的なバグの回避</span>
+<p><code>date</code> は同じオブジェクトを書き換え続けているので、配列に入れるときは必ず <code>new Date(date)</code> で<strong>コピー</strong>します。ここで <code>date</code> をそのまま入れると、<strong>全要素が最終日を指す同一オブジェクト</strong>になります。<code>monday</code> の計算でも <code>new Date(date)</code> してから <code>setDate</code> しているのは、元の <code>date</code> を壊さないためです。</p>
+</div>
+
+<h3>⑤ 土日を捨てる</h3>
+<p><code>if (dayOfWeek &gt;= 1 &amp;&amp; dayOfWeek &lt;= 5)</code> で土日をスキップしています。施設が平日営業だからで、<strong>ドメインの制約をロジックに反映</strong>している箇所です。</p>
+
+<h2>6-3. dateStrToDate / dateToDateStr — DB 用の変換ペア</h2>
+
+<pre><code>export function dateStrToDate(dateStr: string): Date {
+  return new Date(`${dateStr}T00:00:00Z`);   // ← Z = UTC
+}
+export function dateToDateStr(date: Date): string {
+  return date.toISOString().slice(0, 10);    // ← UTC ベース
+}</code></pre>
+
+<p><code>toStr</code> が<strong>ローカル時間ベース（表示用）</strong>なのに対し、こちらは <strong>UTC ベース（DB 用）</strong>です。この2系統を意図的に分けているのが設計のポイントです。</p>
+
+<table>
+<thead><tr><th style="width:28%">関数</th><th style="width:22%">基準</th><th style="width:50%">用途</th></tr></thead>
+<tbody>
+<tr><td><code>toStr</code></td><td>ローカル</td><td>画面に表示する日付を作る</td></tr>
+<tr><td><code>dateStrToDate</code></td><td>UTC</td><td>文字列を DB 保存用の Date にする</td></tr>
+<tr><td><code>dateToDateStr</code></td><td>UTC</td><td>DB から出た Date を文字列にする</td></tr>
+</tbody>
+</table>
+
+<p>MySQL の <code>DATE</code> カラムは Prisma 経由で「<strong>UTC の 0時</strong>」の <code>Date</code> オブジェクトとして往復します。だから DB に入れる／出す変換は UTC で統一する必要があります。</p>
+
+<p><code>"2026-08-03"</code> → <code>Date(2026-08-03T00:00:00Z)</code> → <code>"2026-08-03"</code> と往復して壊れないことを <span class="path">date.test.ts</span> で検証しています。これを <strong>ラウンドトリップテスト</strong>と呼び、変換ペアの正しさを確かめる定番の手法です。</p>
+
+<h2>6-4. 現状の不整合（把握しておくべき点）</h2>
+
+<div class="warn">
+<span class="lbl">この2系統の使い分けが2箇所で崩れています</span>
+<p><strong>(a) <span class="path">attendanceService.ts</span> で toStr を使っている</strong></p>
+<pre style="margin:2mm 0;background:#fff;"><code>date: toStr(a.date)   // ← DB から出た UTC 0時 の Date に、ローカル系の関数を当てている</code></pre>
+<p>DB からは <code>2026-08-06T00:00:00Z</code> が返ります。日本（UTC+9）ではこれはローカル時間の <code>8/6 09:00</code> なので <code>toStr</code> は <code>"2026-08-06"</code> を返し、<strong>たまたま正しく動きます</strong>。しかし UTC より西のタイムゾーン（例：アメリカ）で動かすと <code>8/5 19:00</code> になり <code>"2026-08-05"</code> と<strong>1日ずれます</strong>。本来は <code>dateToDateStr</code> を使うべき箇所です。</p>
+<p style="margin-top:2.5mm;"><strong>(b) <span class="path">attendanceRepository.ts</span> の範囲指定</strong></p>
+<pre style="margin:2mm 0;background:#fff;"><code>const start = new Date(year, month, 1);      // ← ローカル 0時
+const end = new Date(year, month + 1, 1);</code></pre>
+<p>DB のカラムは UTC 0時なのに、比較する境界がローカル 0時です。JST では境界が9時間前にずれるため結果的に月の範囲が合いますが、これも<strong>タイムゾーン依存</strong>です。<code>dateStrToDate("2026-08-01")</code> のような UTC 基準の生成に揃えるのが安全です。</p>
+<p style="margin-top:2.5mm;"><strong>「なぜ今は動いているのか」まで説明できると、理解の深さが伝わります。</strong></p>
+</div>
+</section>
+
+<!-- ========================= 7 ========================= -->
+<section class="chapter">
+<h1><span class="num">07</span>バリデーション層（Zod）</h1>
+
+<h2>7-1. スキーマ定義</h2>
+<p>ファイル：<span class="path">src/schemas/childSchema.ts</span></p>
+
+<pre><code>export const createChildSchema = z.object({
+  name: z.string().min(1, "名前を入力してください").max(20, "名前は20文字までです"),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "色は #RRGGBB 形式で指定してください"),
+  contractDays: z.number().int().min(0).max(13),
+  sortOrder: z.number().int().min(0),
+});
+
+export type CreateChildInput = z.infer&lt;typeof createChildSchema&gt;;</code></pre>
+
+<h3>中核の発想：スキーマファースト / Single Source of Truth</h3>
+
+<p><code>z.infer&lt;typeof createChildSchema&gt;</code> がこの章で最も重要です。<strong>スキーマから TypeScript の型を導出</strong>しています。</p>
+
+<pre><code>type CreateChildInput = {
+  name: string; color: string; contractDays: number; sortOrder: number;
+}</code></pre>
+
+<div class="key">
+<span class="lbl">なぜこれが強力か</span>
+<p>普通なら「型定義」と「バリデーション」を別々に書き、<strong>片方だけ直してズレる</strong>という事故が起きます。Zod ではスキーマが唯一の真実の源であり、型は自動で追従します。<strong>1箇所直せば全部直る。</strong></p>
+</div>
+
+<p>さらに、この 1 つのスキーマが<strong>3箇所で使われています</strong>。</p>
+
+<table>
+<thead><tr><th style="width:38%">使用箇所</th><th style="width:24%">用途</th><th style="width:38%">目的</th></tr></thead>
+<tbody>
+<tr><td><span class="path">ChildForm.tsx</span> の <code>zodResolver</code></td><td>クライアント側検証</td><td>UX（すぐエラーが出て親切）</td></tr>
+<tr><td><span class="path">api/children/route.ts</span> の <code>safeParse</code></td><td>サーバー側検証</td><td>セキュリティ（不正入力の遮断）</td></tr>
+<tr><td><code>z.infer</code></td><td>TypeScript の型</td><td>開発時の型安全</td></tr>
+</tbody>
+</table>
+
+<div class="warn">
+<span class="lbl">両方で検証する理由</span>
+<p>クライアント検証は <strong>curl や DevTools で必ず迂回できます</strong>。だからサーバー検証は絶対に省略できません。逆にサーバー検証だけだと、入力ミスのたびに通信が発生してUXが悪くなります。<strong>役割が違うので両方必要</strong>です。</p>
+</div>
+
+<h3>正規表現による色の検証</h3>
+<p><code>/^#[0-9a-fA-F]{6}$/</code> で <code>#4a86c4</code> 形式のみを許可します。<code>^</code> と <code>$</code> で<strong>全体一致</strong>を強制しているのが重要で、これがないと <code>"xxx#4a86c4yyy"</code> が通過してしまいます。</p>
+
+<h3>エラーメッセージを日本語で埋め込む</h3>
+<p><code>min(1, "名前を入力してください")</code> のように、<strong>バリデーションルールとメッセージを同じ場所に置いて</strong>います。これでフォームと API で同じ文言が出せ、文言の管理場所も 1 箇所になります。</p>
+
+<h2>7-2. クエリパラメータのスキーマ</h2>
+
+<pre><code>export const childListQuerySchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});</code></pre>
+
+<h3>z.coerce.number() — 型強制</h3>
+<p>URL のクエリパラメータは<strong>必ず文字列</strong>です（<code>?page=2</code> → <code>"2"</code>）。<code>z.coerce</code> が <code>Number("2")</code> を内部で実行してから検証します。これがないと常に型エラーになります。</p>
+
+<h3>.default(1) — デフォルト値</h3>
+<p><code>?page=</code> を省略しても <code>1</code> が入ります。<strong>パースとデフォルト適用を同じ場所でやる</strong>ので、後続のコードは「値が必ず存在する」前提で書けます。<code>page ?? 1</code> をあちこちに書かずに済みます。</p>
+
+<h3>.max(100) — 地味だが重要な防御</h3>
+<p><code>?limit=999999</code> を弾きます。これがないと、悪意ある（あるいはうっかりの）リクエストで DB から全件取得されてサーバーが落ちます。<strong>リソース枯渇攻撃への防御</strong>です。</p>
+
+<h2>7-3. safeParse と parse の違い</h2>
+
+<table>
+<thead><tr><th style="width:24%">メソッド</th><th style="width:38%">失敗時の挙動</th><th style="width:38%">適した場面</th></tr></thead>
+<tbody>
+<tr><td><code>parse()</code></td><td><strong>例外を投げる</strong></td><td>「起こり得ないはず」の内部データ</td></tr>
+<tr><td><code>safeParse()</code></td><td><code>{ success, data | error }</code> を返す</td><td><strong>外部入力（採用）</strong></td></tr>
+</tbody>
+</table>
+
+<pre><code>const parsed = createChildSchema.safeParse(body);
+if (!parsed.success) {
+  return Response.json({ errors: toFieldErrors(parsed.error) }, { status: 400 });
+}
+// ここから下では parsed.data が型安全にアクセスできる</code></pre>
+
+<p><code>safeParse</code> を使うと、TypeScript の<strong>判別可能ユニオン（discriminated union）</strong>により、<code>if (!parsed.success)</code> を抜けた後は <code>parsed.data</code> が型安全にアクセスできます。API では「400 を返す」というのは正常な分岐なので、例外ではなく戻り値で扱うのが適切です。</p>
+
+<h2>7-4. エラー変換 — 腐敗防止層</h2>
+<p>ファイル：<span class="path">src/lib/apiError.ts</span></p>
+
+<pre><code>export function toFieldErrors(error: ZodError): FieldError[] {
+  return error.issues.map((issue) =&gt; ({
+    field: issue.path.join("."),
+    message: issue.message,
+  }));
+}</code></pre>
+
+<p>Zod の内部エラー構造を、<strong>API の公開契約である <code>FieldError[]</code> に変換する腐敗防止層（Anti-Corruption Layer）</strong>です。</p>
+
+<ul>
+<li><code>issue.path</code> は <code>["address", "zip"]</code> のような配列 → <code>join(".")</code> で <code>"address.zip"</code> にする。<strong>ネストしたオブジェクトにも対応</strong>したドット記法</li>
+<li>Zod のバージョンが変わって内部構造が変化しても、<strong>この関数だけ直せば API の形は保たれる</strong></li>
+<li>クライアントは <code>errors[0].message</code> で表示、<code>errors[].field</code> でどの入力欄かを特定できる</li>
+</ul>
+
+<p><code>{ errors: [...] }</code> という<strong>一貫したエラー形式</strong>を全 API で使っているのも設計判断です。クライアント側のエラー処理を1つに統一できます。</p>
+</section>
+
+<!-- ========================= 8 ========================= -->
+<section class="chapter">
+<h1><span class="num">08</span>認証とアクセス制御</h1>
+
+<p class="lead">このアプリは3つの層で認可しています。これは<strong>多層防御（Defense in Depth）</strong>の実践です。1つが破られても次で止まります。</p>
+
+<h2>8-1. 層1：proxy.ts — 全ページの入口</h2>
+<p>ファイル：<span class="path">src/proxy.ts</span></p>
+
+<pre><code>export function proxy(request: NextRequest) {
+  const hasSession =
+    request.cookies.has("authjs.session-token") ||
+    request.cookies.has("__Secure-authjs.session-token");
+
+  if (!hasSession) return NextResponse.redirect(new URL("/login", request.url));
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/((?!api|_next|favicon.ico|login).*)"],
+};</code></pre>
+
+<h3>proxy.ts という名前 — Next.js 16 の破壊的変更</h3>
+<p>従来 <span class="path">middleware.ts</span> / <code>export function middleware</code> だったものが、Next.js 16 で <span class="path">proxy.ts</span> / <code>export function proxy</code> にリネームされました。役割は同じで、<strong>全リクエストがルーティングされる前に通る関門</strong>です。</p>
+
+<h3>matcher の正規表現</h3>
+<pre><code>/((?!api|_next|favicon.ico|login).*)</code></pre>
+<p><code>(?!...)</code> は<strong>否定先読み（negative lookahead）</strong>。「<code>api</code>・<code>_next</code>・<code>favicon.ico</code>・<code>login</code> で始まらない全パス」にマッチします。</p>
+
+<table>
+<thead><tr><th style="width:24%">除外対象</th><th style="width:76%">理由</th></tr></thead>
+<tbody>
+<tr><td><code>api</code></td><td>API は自前で <code>requireApprovedUser()</code> を呼ぶ。また API はリダイレクトではなく <strong>401 JSON</strong> を返すべき</td></tr>
+<tr><td><code>_next</code></td><td>JS / CSS などのビルド成果物。認証をかけるとページが描画できなくなる</td></tr>
+<tr><td><code>login</code></td><td>ここもブロックしたら<strong>無限リダイレクトループ</strong>になる</td></tr>
+<tr><td><code>favicon.ico</code></td><td>静的ファイル。認証不要</td></tr>
+</tbody>
+</table>
+
+<h3>Cookie の存在だけを見て、中身を検証していない</h3>
+
+<div class="key">
+<span class="lbl">これは意図的な設計です</span>
+<p>proxy は全リクエストで走るので、ここで DB を叩くと<strong>全ページが遅くなります</strong>。だから「Cookie すら無い明らかな未ログインを弾く」という粗いフィルタに徹し、本当の検証は下の層に任せています。<strong>性能と安全性のトレードオフ</strong>を理解した設計です。Cookie を偽造すれば proxy は通過できますが、次の層で必ず落ちます。</p>
+</div>
+
+<h3>2種類の Cookie 名</h3>
+<p><code>authjs.session-token</code>（HTTP・開発環境）と <code>__Secure-authjs.session-token</code>（HTTPS・本番）。<code>__Secure-</code> は<strong>ブラウザが強制する Cookie 接頭辞</strong>で、HTTPS 経由でしかセットできません。両方チェックするのは開発と本番の両対応のためです。</p>
+
+<h2>8-2. 層2：Server Component</h2>
+<pre><code>const session = await auth();
+if (!session) redirect("/login");</code></pre>
+<p><span class="path">page.tsx</span> で、DB のセッションテーブルを実際に照会します。Cookie の中身が本物かをここで初めて確認します。</p>
+
+<h2>8-3. 層3：requireApprovedUser — API のガード</h2>
+<p>ファイル：<span class="path">src/lib/requireApprovedUser.ts</span></p>
+
+<pre><code>export async function requireApprovedUser() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { ok: false, status: 401, message: "ログインが必要です" } as const;
+  }
+  const user = await findUserById(session.user.id);
+  if (!user) {
+    return { ok: false, status: 401, message: "ログインが必要です" } as const;
+  }
+  if (!user.approved) {
+    return { ok: false, status: 403, message: "利用が承認されていません" } as const;
+  }
+  return { ok: true, user } as const;
+}</code></pre>
+
+<h3>判別可能ユニオン + as const</h3>
+<p><code>as const</code> により、戻り値の型が<strong>リテラル型のユニオン</strong>になります。</p>
+
+<pre><code>| { ok: false; status: 401; message: "ログインが必要です" }
+| { ok: false; status: 403; message: "利用が承認されていません" }
+| { ok: true;  user: User }</code></pre>
+
+<p><code>ok</code> が判別子（discriminant）なので、<code>if (!authResult.ok)</code> を抜けた後は <code>authResult.user</code> が型安全に使えます。<strong>TypeScript が自動で型を絞り込みます（narrowing）</strong>。<code>as const</code> がないと <code>ok: boolean</code> になり、絞り込みが効きません。</p>
+
+<h3>401 と 403 の使い分け — HTTP の正しい理解</h3>
+
+<table>
+<thead><tr><th style="width:22%">コード</th><th style="width:38%">意味</th><th style="width:40%">解決方法</th></tr></thead>
+<tbody>
+<tr><td><strong>401</strong> Unauthorized</td><td><strong>あなたが誰か分からない</strong></td><td>ログインすれば解決する</td></tr>
+<tr><td><strong>403</strong> Forbidden</td><td><strong>誰かは分かるが権限がない</strong></td><td>ログインし直しても無駄。管理者の承認が必要</td></tr>
+</tbody>
+</table>
+
+<p><code>approved: false</code> は「本人確認はできているが許可されていない」状態なので <strong>403</strong> です。ここを正確に使い分けているのは good practice です。（401 の名前が Unauthorized なのは歴史的な誤りで、実際の意味は Unauthenticated です。）</p>
+
+<h3>セッションを信じず、DB を再確認する</h3>
+<pre><code>const user = await findUserById(session.user.id);</code></pre>
+<p>セッションが有効でも、<strong>その都度 DB の <code>approved</code> を読み直します</strong>。管理者が承認を取り消した瞬間から使えなくなります。もし <code>approved</code> をセッションにキャッシュしていたら、セッション期限まで使い続けられてしまいます。</p>
+
+<h3>例外ではなく戻り値でエラーを表現する</h3>
+<p><code>throw new UnauthorizedError()</code> ではなく <code>{ ok: false, ... }</code> を返す設計です。呼び出し側が try / catch を書かずに済み、<strong>型システムが「エラー処理を書き忘れていないか」をチェックできます</strong>（<code>authResult.user</code> は <code>ok</code> チェックを通らないとアクセスできない）。Rust の <code>Result</code> 型に近い発想です。</p>
+
+<h2>8-4. 認証本体</h2>
+<p>ファイル：<span class="path">src/auth.ts</span></p>
+
+<pre><code>export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: PrismaAdapter(prisma),
+  providers: [GitHub],
+  session: { strategy: "database" },
+});</code></pre>
+
+<ul>
+<li><strong>分割代入エクスポート</strong> — NextAuth v5 は設定を1箇所に書いて4つの道具を取り出す設計。v4 の「<span class="path">[...nextauth].ts</span> に全部書く」方式から改善されました</li>
+<li><strong>Adapter パターン</strong> — <code>PrismaAdapter</code> が「Auth.js が要求する保存操作」と「Prisma」の橋渡しをします。Drizzle や MongoDB に差し替え可能です</li>
+<li><strong>OAuth 2.0 / OpenID Connect</strong> — GitHub にパスワードを預け、自分は持ちません。<strong>パスワードを保存しないことが最強のパスワード管理</strong>という発想です。漏洩しようがありません</li>
+</ul>
+
+<h2>8-5. キャッチオールルート</h2>
+<p>ファイル：<span class="path">src/app/api/auth/[...nextauth]/route.ts</span></p>
+
+<pre><code>export const { GET, POST } = handlers;</code></pre>
+
+<p><code>[...nextauth]</code> は<strong>キャッチオールセグメント</strong>です。<code>/api/auth/signin</code>、<code>/api/auth/callback/github</code>、<code>/api/auth/session</code> など、Auth.js が使う複数のエンドポイントを1ファイルで受けます。中身は Auth.js に丸投げで、実質2行です。</p>
+</section>
+
+<!-- ========================= 9 ========================= -->
+<section class="chapter">
+<h1><span class="num">09</span>API ルート（Route Handler）</h1>
+
+<p class="lead">ファイル：<span class="path">src/app/api/children/route.ts</span>。<strong>処理の順番そのものが設計</strong>になっています。</p>
+
+<pre><code>export async function POST(request: Request) {
+  const logger = createLogger({ requestId: crypto.randomUUID() });   // ①
+  const authResult = await requireApprovedUser();                    // ②
+  if (!authResult.ok) {
+    return Response.json({ error: authResult.message }, { status: authResult.status });
+  }
+
+  logger("info", "child.create.start");                              // ③
+  const body = await request.json();
+  const parsed = createChildSchema.safeParse(body);                  // ④
+
+  if (!parsed.success) {
+    const errors = toFieldErrors(parsed.error);
+    logger("warn", "child.create.failed", { fields: errors.map((e) =&gt; e.field) });
+    return Response.json({ errors }, { status: 400 });
+  }
+
+  const child = await addChild(parsed.data);                         // ⑤
+  logger("info", "child.create.success", { childId: child.id });
+  return Response.json(child, { status: 201 });                      // ⑥
+}</code></pre>
+
+<h2>9-1. 認証 → 検証 → 実行 という順番</h2>
+
+<div class="key">
+<span class="lbl">なぜ認証が先か</span>
+<p>未認証ユーザーに<strong>バリデーションエラーの詳細を教えない</strong>ためです（情報漏洩の最小化）。「どのフィールドが必須か」も攻撃者にとっては情報になります。また、無駄な処理を早期に打ち切れます。</p>
+</div>
+
+<p>この「<strong>ガード節を積み上げて、正常系を最後に置く</strong>」書き方は、ネストが深くならず読みやすくなります。<code>if (ok) { if (valid) { ... } }</code> と入れ子にする書き方の対極です。</p>
+
+<h2>9-2. Web 標準 API を使っている</h2>
+<p><code>Request</code> / <code>Response</code> は Next.js 独自ではなく <strong>Web 標準（Fetch API）</strong>です。<code>request.json()</code>、<code>new URL(request.url)</code>、<code>Response.json()</code> はブラウザにもあるのと同じ API です。</p>
+<p>Express の <code>req</code> / <code>res</code> と違い、Deno や Cloudflare Workers でも通用する知識になります。<code>Response.json(data, { status: 201 })</code> は <code>Content-Type: application/json</code> を自動で付けてくれる静的メソッドです。</p>
+
+<h2>9-3. Object.fromEntries(searchParams)</h2>
+<pre><code>const { searchParams } = new URL(request.url);
+const parsed = childListQuerySchema.safeParse(Object.fromEntries(searchParams));</code></pre>
+<p><code>URLSearchParams</code> は<strong>イテラブル</strong>で <code>[["page","2"],["limit","20"]]</code> を吐きます。<code>Object.fromEntries</code> で<strong>プレーンオブジェクトに変換</strong>し、Zod に渡します。1行でクエリ全体を扱える定番イディオムです。<br>（同じキーが複数ある場合は最後の値だけ残りますが、このアプリでは問題になりません。）</p>
+
+<h2>9-4. HTTP ステータスコードの使い分け</h2>
+
+<table>
+<thead><tr><th style="width:18%">コード</th><th style="width:32%">意味</th><th style="width:50%">使用箇所</th></tr></thead>
+<tbody>
+<tr><td>200</td><td>OK</td><td>GET 成功</td></tr>
+<tr><td><strong>201</strong></td><td><strong>Created</strong></td><td><strong>POST 成功時（リソースを作成した）</strong></td></tr>
+<tr><td>400</td><td>Bad Request</td><td>Zod 検証失敗</td></tr>
+<tr><td>401</td><td>Unauthorized</td><td>セッションなし</td></tr>
+<tr><td>403</td><td>Forbidden</td><td><code>approved: false</code></td></tr>
+</tbody>
+</table>
+
+<p>POST で 200 ではなく <strong>201</strong> を返しているのが丁寧なポイントです。「作成された」ことがステータスコードだけで伝わります。</p>
+
+<h2>9-5. 構造化ログ</h2>
+<p>ファイル：<span class="path">src/lib/logger.ts</span></p>
+
+<pre><code>export function log(level, message, context = {}) {
+  console.log(JSON.stringify({
+    time: new Date().toISOString(), level, message, ...context
+  }));
+}
+
+export function createLogger(base: Record&lt;string, unknown&gt;) {
+  return (level, message, context = {}) =&gt;
+    log(level, message, { ...base, ...context });
+}</code></pre>
+
+<h3>JSON 1行ログ（構造化ログ）</h3>
+<p><code>console.log("児童を作成しました: " + id)</code> のような文字列ログではなく、<strong>機械可読な JSON</strong> を1行で出します。CloudWatch / Datadog / Loki などのログ基盤が<strong>そのままフィールドとして検索・集計できる</strong>ようになります。「<code>level: "warn"</code> かつ <code>message: "child.create.failed"</code> を日別に集計」といったクエリが書けます。</p>
+
+<h3>高階関数によるコンテキスト注入</h3>
+<p><code>createLogger</code> は<strong>関数を返す関数（高階関数）</strong>です。クロージャで <code>base</code> を捕まえておき、以降の全ログに自動で混ぜ込みます。</p>
+
+<pre><code>const logger = createLogger({ requestId: crypto.randomUUID() });</code></pre>
+
+<div class="key">
+<span class="lbl">相関ID（Correlation ID）</span>
+<p>これでそのリクエスト中の全ログに<strong>同じ <code>requestId</code></strong> が入ります。大量のログの中から「あの1リクエストで何が起きたか」を追跡できるようになります。分散システムのデバッグでは必須の技術です。</p>
+</div>
+
+<p><code>{ ...base, ...context }</code> の順序も意図的で、<strong>後から渡した <code>context</code> が base を上書きできる</strong>ようになっています。</p>
+
+<h3>イベント名の命名規則</h3>
+<p><code>child.create.start</code> / <code>child.create.failed</code> / <code>child.create.success</code> という<strong>ドット区切りの階層的な名前</strong>を使っています。<code>child.create.*</code> で前方一致検索でき、<code>.failed</code> で横断検索もできます。日本語の自由文だと検索も集計もできません。</p>
+
+<h3>ログの内容への配慮</h3>
+<pre><code>logger("warn", "child.create.failed", { fields: errors.map((e) =&gt; e.field) });</code></pre>
+<p><strong>フィールド名だけ</strong>をログに出し、<code>name</code> の実際の値（＝児童の氏名という個人情報）は出していません。<strong>個人情報をログに残さない</strong>という配慮です。ログは長期保存され、アクセス権も広くなりがちなので重要です。</p>
+
+<h3>crypto.randomUUID()</h3>
+<p>Web 標準 API です。ライブラリ（uuid パッケージ）不要で、暗号学的に安全な UUID v4 を生成します。</p>
+</section>
+
+<!-- ========================= 10 ========================= -->
+<section class="chapter">
+<h1><span class="num">10</span>クライアント層</h1>
+
+<h2>10-1. Server Component と Client Component の境界</h2>
+
+<p>App Router で最も重要な概念です。</p>
+
+<table>
+<thead><tr><th style="width:28%"></th><th style="width:36%">Server Component（既定）</th><th style="width:36%">Client Component（<code>"use client"</code>）</th></tr></thead>
+<tbody>
+<tr><td>実行場所</td><td>サーバーのみ</td><td>サーバー（初回HTML）＋ブラウザ</td></tr>
+<tr><td>DB 直アクセス</td><td><strong>できる</strong></td><td>できない</td></tr>
+<tr><td><code>useState</code> / <code>useEffect</code></td><td><strong>使えない</strong></td><td>使える</td></tr>
+<tr><td>onClick 等のイベント</td><td><strong>使えない</strong></td><td>使える</td></tr>
+<tr><td>JS バンドル</td><td><strong>含まれない</strong></td><td>含まれる</td></tr>
+</tbody>
+</table>
+
+<h3>このアプリの割り当て</h3>
+
+<table>
+<thead><tr><th style="width:30%">ファイル</th><th style="width:18%">種別</th><th style="width:52%">理由</th></tr></thead>
+<tbody>
+<tr><td><span class="path">layout.tsx</span></td><td><span class="tag srv">Server</span></td><td>静的な骨組みのみ</td></tr>
+<tr><td><span class="path">page.tsx</span></td><td><span class="tag srv">Server</span> async</td><td><code>auth()</code> で DB を直接読む</td></tr>
+<tr><td><span class="path">Calendar.tsx</span></td><td><span class="tag srv">Server</span></td><td>計算と描画のみ、状態を持たない</td></tr>
+<tr><td><span class="path">Providers.tsx</span></td><td><span class="tag cli">Client</span></td><td><code>useState</code> と Context が必要</td></tr>
+<tr><td><span class="path">ChildList.tsx</span></td><td><span class="tag cli">Client</span></td><td><code>useQuery</code> フックを使う</td></tr>
+<tr><td><span class="path">ChildForm.tsx</span></td><td><span class="tag cli">Client</span></td><td>フォームの状態管理</td></tr>
+</tbody>
+</table>
+
+<div class="key">
+<span class="lbl">原則："use client" はできるだけ葉（末端）に置く</span>
+<p><code>"use client"</code> を付けたコンポーネントの <strong>import 先も全部 Client になります</strong>。上のほうに付けるとアプリ全体がクライアントに落ち、JS バンドルが太ります。</p>
+</div>
+
+<h3>重要：children による境界の突破</h3>
+
+<p><span class="path">layout.tsx</span> では <code>Providers</code>（Client）が全体を包んでいます。</p>
+
+<pre><code>&lt;body&gt;&lt;Providers&gt;{children}&lt;/Providers&gt;&lt;/body&gt;</code></pre>
+
+<p>ここで疑問が湧くはずです — 「じゃあ <span class="path">page.tsx</span> もクライアントになるのでは？」</p>
+
+<div class="key">
+<span class="lbl">なりません</span>
+<p><code>children</code> として <strong>props 経由で渡された Server Component は Server のまま</strong>です。Providers はそれを「すでにレンダリング済みの結果」として受け取って表示するだけです。</p>
+<p style="margin-top:2mm;">これが <strong>children パターン（コンポジション）</strong> で、Client Provider を使いつつサーバーレンダリングを維持する App Router の最重要テクニックです。<strong>「import した子は Client になるが、children で渡された子はならない」</strong>と覚えます。</p>
+</div>
+
+<h2>10-2. layout.tsx</h2>
+
+<pre><code>const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "ひまわり予定表",
+  description: "療育施設の日程を管理するWebアプリ",
+};</code></pre>
+
+<h3>next/font によるフォント最適化</h3>
+<p>ビルド時にフォントをダウンロードして<strong>自己ホスティング</strong>します。効果は3つです。</p>
+<ul>
+<li><strong>プライバシー</strong> — Google のサーバーにユーザーの IP が渡らない</li>
+<li><strong>速度</strong> — 外部への DNS 解決・TLS 接続が不要になる</li>
+<li><strong>CLS 防止</strong> — レイアウトシフトを防ぐためのフォールバックフォント調整を自動で行う</li>
+</ul>
+
+<h3>その他の要素</h3>
+<ul>
+<li><code>variable: "--font-geist-sans"</code> — CSS 変数として出力し、<code>&lt;html className={geistSans.variable}&gt;</code> で流し込む。Tailwind の <code>@theme</code> から参照できる</li>
+<li><code>subsets: ["latin"]</code> — 使う文字だけダウンロードしてファイルサイズを削減</li>
+<li><code>metadata</code> エクスポート — Next.js が <code>&lt;head&gt;</code> に <code>&lt;title&gt;</code> と <code>&lt;meta&gt;</code> を自動挿入する宣言的 API</li>
+<li><code>lang="ja"</code> — アクセシビリティ（スクリーンリーダーの読み上げ言語）に必須</li>
+<li><code>Readonly&lt;{ children: React.ReactNode }&gt;</code> — <code>React.ReactNode</code> は「React が描画できるもの全部」（JSX、文字列、数値、null、配列）を表す最も広い型</li>
+<li><code>h-full</code> ＋ <code>flex min-h-full flex-col</code> — フッターを最下部に固定する定番の flex レイアウト</li>
+</ul>
+
+<h2>10-3. page.tsx</h2>
+
+<pre><code>export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise&lt;{ year?: string; month?: string }&gt;;
+}) {
+  const session = await auth();
+  if (!session) redirect("/login");
+
+  const params = await searchParams;
+  const now = new Date();
+  const year = Number(params.year) || now.getFullYear();
+  const month = params.month ? Number(params.month) - 1 : now.getMonth();
+  ...
+}</code></pre>
+
+<h3>async なコンポーネント</h3>
+<p>React 19 ＋ Server Components の機能です。<strong>コンポーネント関数自体が async</strong> で、中で <code>await</code> できます。従来は <code>useEffect</code> ＋ <code>useState</code> でやっていたデータ取得が、<code>await</code> 1行になります。</p>
+
+<h3>searchParams が Promise である理由</h3>
+<p><strong>Next.js 15 の破壊的変更</strong>です。以前は同期オブジェクトでしたが、部分プリレンダリング対応のため非同期化されました。<code>await searchParams</code> が必要です。</p>
+
+<h3>URL をアプリの状態にする（URL as State）</h3>
+<p>表示中の年月を <code>useState</code> ではなく <strong>URL のクエリパラメータ</strong>で持っています。</p>
+
+<pre><code>/?year=2026&amp;month=9</code></pre>
+
+<table>
+<thead><tr><th style="width:34%">得られるもの</th><th style="width:66%">内容</th></tr></thead>
+<tbody>
+<tr><td>共有・ブックマーク</td><td>URL を送れば相手も同じ画面が開く</td></tr>
+<tr><td>ブラウザの戻る／進む</td><td>そのまま効く</td></tr>
+<tr><td>リロード耐性</td><td>更新しても表示月が消えない</td></tr>
+<tr><td>コード量</td><td>状態管理コードが一切不要</td></tr>
+</tbody>
+</table>
+
+<p><span class="path">Calendar.tsx</span> の前月／翌月が <code>&lt;button onClick&gt;</code> ではなく <strong><code>&lt;Link href&gt;</code></strong> なのはこのためです。JS が無効でも動き、右クリックで新規タブも開けます。</p>
+
+<h3>フォールバック値の書き分け — || の罠</h3>
+
+<pre><code>const year = Number(params.year) || now.getFullYear();
+const month = params.month ? Number(params.month) - 1 : now.getMonth();</code></pre>
+
+<div class="warn">
+<span class="lbl">なぜ month だけ書き方が違うのか</span>
+<p><code>year</code> は <code>||</code> で問題ありません（年に 0 はあり得ないため）。<br>
+しかし <code>month</code> は <code>||</code> が使えません。<code>?month=1</code>（1月）→ <code>1 - 1 = 0</code> となり、<code>0 || now.getMonth()</code> は <strong>0 が falsy なので今月に化けます</strong>。だから三項演算子で「パラメータが存在するか」を先に判定しています。</p>
+</div>
+
+<p><code>- 1</code> は URL（人間向け 1〜12）と JS の月（0〜11）の変換です。<strong>境界で変換して、内部は 0 始まりで統一</strong>する方針になっています。</p>
+
+<h3>Server Action</h3>
+
+<pre><code>&lt;form action={async () =&gt; { "use server"; await signOut(); }}&gt;
+  &lt;button type="submit"&gt;ログアウト&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+<p><strong>Server Action</strong>（React 19）です。関数の中に <code>"use server"</code> を書くと、その関数は<strong>サーバーでのみ実行</strong>され、クライアントには「呼び出すための ID」だけが渡ります。React が内部で POST リクエストを生成します。</p>
+
+<ul>
+<li><code>&lt;form action={...}&gt;</code> に渡しているので、<strong>JS が読み込まれる前でも動作</strong>します（プログレッシブエンハンスメント）</li>
+<li><code>onClick</code> ＋ <code>fetch</code> と違い、API ルートを作る必要がありません</li>
+<li>ログアウトを <code>&lt;a href&gt;</code> ではなく <code>&lt;form&gt;</code> ＋ POST にしているのは正しく、<strong>GET は副作用を持ってはいけない</strong>（ブラウザやクローラーが勝手に叩く可能性がある）という HTTP の原則に沿っています</li>
+</ul>
+
+<h2>10-4. Providers.tsx</h2>
+
+<pre><code>"use client";
+export function Providers({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(() =&gt; new QueryClient());
+  return (
+    &lt;QueryClientProvider client={queryClient}&gt;
+      {children}
+      &lt;Toaster richColors position="top-center" /&gt;
+    &lt;/QueryClientProvider&gt;
+  );
+}</code></pre>
+
+<h3>useState(() =&gt; new QueryClient()) — 2つの罠の回避</h3>
+
+<div class="warn">
+<span class="lbl">罠1：モジュールスコープで作ってはいけない</span>
+<pre style="margin:2mm 0 0;background:#fff;"><code>const queryClient = new QueryClient();   // ✕ 危険</code></pre>
+<p style="margin-top:2mm;">サーバーでは同じモジュールが<strong>全ユーザーで共有</strong>されます。A さんのデータがキャッシュされ、B さんに漏れます。<strong>深刻なセキュリティ問題</strong>です。<code>useState</code> に入れることでコンポーネントインスタンスごとに1つになります。</p>
+</div>
+
+<div class="warn">
+<span class="lbl">罠2：useState(new QueryClient()) ではいけない</span>
+<pre style="margin:2mm 0 0;background:#fff;"><code>const [queryClient] = useState(new QueryClient());   // ✕ 無駄</code></pre>
+<p style="margin-top:2mm;">これだと<strong>再レンダリングのたびに <code>new QueryClient()</code> が実行</strong>されます（結果は捨てられますが、生成コストは払います）。<code>useState(() =&gt; ...)</code> の<strong>関数を渡す形（遅延初期化 / lazy initializer）</strong>なら、React は初回だけ関数を呼びます。</p>
+</div>
+
+<h3>Provider パターン（React Context）</h3>
+<p><code>QueryClientProvider</code> は Context を使って、配下のどの深さのコンポーネントからも <code>useQueryClient()</code> で client を取れるようにします。props を何段も手渡しする <strong>prop drilling</strong> を回避する仕組みです。</p>
+
+<h3>Toaster をここに1つだけ置く</h3>
+<p>トースト通知の<strong>表示場所</strong>を1箇所に置き、各コンポーネントからは <code>toast.success("...")</code> を呼ぶだけにしています。<strong>「通知を出したい人」と「通知を表示する人」を分離</strong>する設計です。<code>position="top-center"</code> で表示位置、<code>richColors</code> で成功＝緑・失敗＝赤の色分けが有効になります。</p>
+
+<h2>10-5. useChildList — データ取得フック</h2>
+
+<pre><code>async function fetchChildList(): Promise&lt;ChildListResponse&gt; {
+  const res = await fetch("/api/children?limit=100");
+  if (!res.ok) throw new Error("子供の取得に失敗しました");
+  return res.json();
+}
+
+export function useChildList() {
+  return useQuery({ queryKey: ["children"], queryFn: fetchChildList });
+}</code></pre>
+
+<h3>if (!res.ok) throw — fetch の有名な落とし穴</h3>
+<div class="warn">
+<span class="lbl">fetch は 404 や 500 でも reject しません</span>
+<p>reject するのは<strong>ネットワークが切断されたときだけ</strong>です。<code>res.ok</code>（ステータスが 200〜299 か）を自分でチェックして例外にする必要があります。React Query はこの例外を捕まえて <code>isError</code> にします。</p>
+</div>
+
+<h3>queryKey: ["children"] — キャッシュの住所</h3>
+<p>React Query の中核概念です。このキーが<strong>キャッシュのキー</strong>であり、</p>
+<ul>
+<li>同じキーの <code>useQuery</code> は<strong>キャッシュを共有</strong>する（複数コンポーネントで呼んでも fetch は1回）</li>
+<li><code>invalidateQueries({ queryKey: ["children"] })</code> でこのキーのキャッシュを無効化できる</li>
+</ul>
+<p>配列なのは階層を表すためです。<code>["children", { page: 2 }]</code> のようにパラメータを含めると、パラメータごとに別キャッシュになり、<strong>キーが変わると自動で再取得</strong>されます。</p>
+
+<h3>カスタムフックに切り出す発想</h3>
+<p><code>useQuery(...)</code> をコンポーネントに直接書かず <code>useChildList()</code> に包む理由：</p>
+<ul>
+<li><strong>queryKey のタイプミスを防ぐ</strong>（1箇所に集約）</li>
+<li>fetch の URL やエラーメッセージも1箇所にまとまる</li>
+<li>複数のコンポーネントから使い回せる</li>
+<li>後で「React Query をやめる」となってもフックの中だけ直せばよい（<strong>ロジックのカプセル化</strong>）</li>
+</ul>
+<p>これが <strong>Custom Hook パターン</strong>で、React における「ロジックの再利用単位」です。</p>
+
+<h3>React Query が自動でやってくれること</h3>
+<p>自分で <code>useEffect</code> ＋ <code>useState</code> で書くと自前実装が必要になるものが、全部入っています。</p>
+<ul>
+<li>ローディング状態 / エラー状態の管理</li>
+<li><strong>キャッシュ</strong> — 2回目以降は即座に表示</li>
+<li><strong>重複排除（deduplication）</strong> — 同時に同じクエリが走らない</li>
+<li><strong>ウィンドウ復帰時の再取得</strong> — タブを戻ると最新化</li>
+<li><strong>リトライ</strong> — 失敗時に自動再試行</li>
+<li><strong>競合状態の回避</strong> — 古いレスポンスが新しいのを上書きする問題を防ぐ</li>
+</ul>
+
+<h2>10-6. useAddChild — 更新フック</h2>
+
+<pre><code>async function postChild(input: CreateChildInput): Promise&lt;Child&gt; {
+  const res = await fetch("/api/children", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() =&gt; null);
+    const message =
+      body?.errors?.[0]?.message ?? body?.error ?? "登録に失敗しました";
+    throw new Error(message);
+  }
+  return res.json();
+}
+
+export function useAddChild() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: postChild,
+    onSuccess: () =&gt; {
+      queryClient.invalidateQueries({ queryKey: ["children"] });
+      toast.success("登録しました");
+    },
+    onError: (error) =&gt; toast.error(error.message),
+  });
+}</code></pre>
+
+<h3>useQuery と useMutation の使い分け</h3>
+
+<table>
+<thead><tr><th style="width:24%">フック</th><th style="width:24%">対象</th><th style="width:52%">実行タイミング</th></tr></thead>
+<tbody>
+<tr><td><code>useQuery</code></td><td>読み取り（GET）</td><td><strong>自動で実行</strong>され、キャッシュされる</td></tr>
+<tr><td><code>useMutation</code></td><td>書き込み（POST/PUT/DELETE）</td><td><strong><code>mutate()</code> を呼んだときだけ</strong>実行、キャッシュしない</td></tr>
+</tbody>
+</table>
+
+<p>「副作用のある操作は勝手に実行してはいけない」という区別です。</p>
+
+<h3>三段のエラーメッセージフォールバック</h3>
+
+<pre><code>body?.errors?.[0]?.message ?? body?.error ?? "登録に失敗しました"</code></pre>
+
+<table>
+<thead><tr><th style="width:14%">段</th><th style="width:44%">形式</th><th style="width:42%">発生源</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><code>{ errors: [{ field, message }] }</code></td><td>Zod のフィールドエラー（400）</td></tr>
+<tr><td>2</td><td><code>{ error: "..." }</code></td><td>認証エラー（401 / 403）</td></tr>
+<tr><td>3</td><td>固定文言</td><td>それ以外（500 で HTML が返る等）</td></tr>
+</tbody>
+</table>
+
+<p><strong>オプショナルチェーン <code>?.</code></strong> で途中が undefined でも落ちず、<strong><code>??</code></strong> で順に次を試します。3種類のエラー形式を1行で吸収しています。</p>
+
+<p><code>await res.json().catch(() =&gt; null)</code> も重要で、<strong>サーバーが JSON を返さなかった場合</strong>（500 で HTML エラーページが返る等）に <code>res.json()</code> が例外を投げるのを防いでいます。<strong>エラー処理の中でさらにエラーが出る</strong>のを防ぐ配慮です。</p>
+
+<h3>キャッシュ無効化（Invalidation）— フォームと一覧をつなぐ唯一の線</h3>
+
+<pre><code>onSuccess: () =&gt; queryClient.invalidateQueries({ queryKey: ["children"] })</code></pre>
+
+<div class="key">
+<span class="lbl">ここが React Query を使う最大の理由</span>
+<p>追加成功 → <code>["children"]</code> のキャッシュを「古い」とマーク → 画面に表示中の <code>useChildList</code> が<strong>自動で再取得</strong> → 一覧に新しい児童が現れる。</p>
+<p style="margin-top:2mm;"><code>ChildForm</code> と <code>ChildList</code> は<strong>互いを一切知りません</strong>。props も渡していません。<strong>queryKey という共通言語だけで疎結合に連携</strong>しています。</p>
+</div>
+
+<p>発展形として、<code>setQueryData</code> で手動でキャッシュに追加する方法や、<strong>楽観的更新（optimistic update）</strong>でサーバー応答を待たず即座に画面反映する方法もあります。</p>
+
+<h3>onSuccess が2箇所にある理由</h3>
+
+<pre><code>// フック側
+onSuccess: () =&gt; { invalidateQueries(); toast.success(...); }
+
+// ChildForm 側
+addChild.mutate(values, { onSuccess: () =&gt; reset() });</code></pre>
+
+<p><strong>両方とも実行されます。</strong>役割分担が明確です。</p>
+<ul>
+<li><strong>フック側</strong> ＝ どこから呼んでも必要な共通処理（キャッシュ更新、通知）</li>
+<li><strong>呼び出し側</strong> ＝ その画面固有の処理（フォームのリセット）</li>
+</ul>
+<p>「共通の関心事はフックに、固有の関心事は呼び出し側に」という<strong>関心の分離</strong>です。</p>
+
+<h2>10-7. ChildForm.tsx</h2>
+
+<pre><code>const { register, handleSubmit, reset, formState: { errors } } =
+  useForm&lt;CreateChildInput&gt;({
+    resolver: zodResolver(createChildSchema),
+    defaultValues: {
+      name: "", color: "#4a86c4", contractDays: 0, sortOrder: 0,
+    },
+  });</code></pre>
+
+<h3>非制御コンポーネント — React Hook Form の設計思想</h3>
+
+<pre><code>&lt;input {...register("name")} /&gt;</code></pre>
+
+<p><code>register("name")</code> は <code>{ name, onChange, onBlur, ref }</code> を返し、スプレッドで input に展開されます。ポイントは <strong><code>ref</code> で DOM 要素を直接参照している</strong>ことです。</p>
+
+<table>
+<thead><tr><th style="width:30%"></th><th style="width:35%">制御コンポーネント（useState）</th><th style="width:35%">非制御（RHF・採用）</th></tr></thead>
+<tbody>
+<tr><td>値の保持場所</td><td>React の state</td><td><strong>DOM 自身</strong></td></tr>
+<tr><td>1文字入力するたび</td><td><strong>再レンダリング</strong></td><td><strong>再レンダリングなし</strong></td></tr>
+<tr><td>コード量</td><td>項目ごとに state ＋ onChange</td><td><code>{...register("name")}</code> のみ</td></tr>
+</tbody>
+</table>
+
+<p>フォームの項目が増えるほど差が出ます。「入力のたびにフォーム全体が再描画される」のを避ける<strong>パフォーマンス最適化</strong>が設計に組み込まれています。</p>
+
+<h3>handleSubmit(onSubmit) — 高階関数</h3>
+<p><code>handleSubmit</code> が次の5つをやってくれます。</p>
+<ol>
+<li><code>event.preventDefault()</code>（ページリロードを防ぐ）</li>
+<li>全フィールドの値を集める</li>
+<li><strong>Zod で検証する</strong></li>
+<li>成功したときだけ <code>onSubmit(values)</code> を呼ぶ</li>
+<li>失敗なら <code>errors</code> を埋める</li>
+</ol>
+<p>だから <code>onSubmit</code> は<strong>検証済みの正しいデータだけ</strong>を受け取れます。型も <code>CreateChildInput</code> として保証されます。</p>
+
+<h3>zodResolver — アダプターパターン</h3>
+<p>RHF は Zod を知りません。Yup、Joi、Valibot など何でも使えるように<strong>リゾルバというインターフェース</strong>を切っています。<code>zodResolver</code> はその実装で、<strong>RHF と Zod の接続アダプター</strong>です。</p>
+<p>これにより <span class="path">schemas/childSchema.ts</span> の 1 つのスキーマが、クライアント検証にもサーバー検証にも使えます。<strong>二重管理ゼロ</strong>です。</p>
+
+<h3>valueAsNumber: true</h3>
+
+<pre><code>&lt;input type="number" {...register("contractDays", { valueAsNumber: true })} /&gt;</code></pre>
+
+<div class="warn">
+<span class="lbl">HTML の input の値は type="number" でも常に文字列</span>
+<p><code>"5"</code> が返ってきます。Zod スキーマは <code>z.number()</code> を要求しているので、そのままだと<strong>必ず検証エラー</strong>になります。<code>valueAsNumber</code> が <code>Number()</code> 変換をかけます。</p>
+</div>
+
+<p>サーバー側（クエリ）では <code>z.coerce.number()</code>、クライアント側では <code>valueAsNumber</code> と、<strong>それぞれの場所に合った型変換</strong>をしています。</p>
+
+<h3>ジェネリクス useForm&lt;CreateChildInput&gt;</h3>
+<p>型パラメータを渡すことで、</p>
+<ul>
+<li><code>register("nmae")</code> のタイプミスが<strong>コンパイルエラー</strong>になる</li>
+<li><code>errors.name</code> が補完される</li>
+<li><code>onSubmit(values)</code> の <code>values</code> に型が付く</li>
+</ul>
+<p><strong>Zod スキーマから導出した型が、フォームの隅々まで行き渡ります。</strong></p>
+
+<h3>その他の配慮</h3>
+<ul>
+<li><code>disabled={addChild.isPending}</code> — 送信中はボタンを無効化して<strong>二重送信を防ぐ</strong>。<code>isPending</code> は React Query が管理してくれる状態</li>
+<li><code>reset()</code> — <code>defaultValues</code> で指定した初期値に戻す。連続で複数の児童を登録する運用を想定した配慮</li>
+</ul>
+
+<h2>10-8. ChildList.tsx と Skeleton</h2>
+
+<pre><code>const { data, isPending, isError } = useChildList();
+
+if (isPending) return &lt;ChildListSkeleton /&gt;;
+if (isError) return &lt;p&gt;エラーが発生しました&lt;/p&gt;;
+
+return (
+  &lt;ul&gt;
+    {data.data.map((child) =&gt; (
+      &lt;li key={child.id} style={{ color: child.color }}&gt;
+        {child.name}（契約 {child.contractDays} 日）
+      &lt;/li&gt;
+    ))}
+  &lt;/ul&gt;
+);</code></pre>
+
+<h3>3状態の網羅（early return）</h3>
+<p><strong>読み込み中 / エラー / 成功</strong>の3つを漏れなく扱っています。early return で先に2つを処理するので、</p>
+
+<div class="key">
+<span class="lbl">ガード節が型安全にも貢献する</span>
+<p>最後の <code>return</code> の時点で TypeScript は <code>data</code> が undefined でないと判断できます（型の絞り込み）。だから <code>data.data.map</code> が <code>data?.data?.map</code> なしで書けます。</p>
+</div>
+
+<h3>key={child.id} — インデックスを使わない理由</h3>
+<p>React のリストレンダリングに必須です。<strong>配列のインデックスではなく DB の id を使う</strong>のが重要で、インデックスだと並び替えや途中削除が起きたときに React が要素を取り違え、<strong>入力中の値が別の行に移る</strong>等のバグになります。</p>
+
+<h3>style={{ color: child.color }} — ここだけインラインスタイル</h3>
+<p>色は<strong>実行時に DB から来る動的な値</strong>なので、Tailwind のクラス（ビルド時に静的解析される）では表現できません。ここだけインラインスタイルを使うのは正しい判断です。</p>
+
+<h3>Skeleton UI</h3>
+<pre><code>{[0, 1, 2].map((i) =&gt; (
+  &lt;li key={i} className="h-5 w-48 animate-pulse rounded bg-gray-200" /&gt;
+))}</code></pre>
+
+<p>スピナーではなく<strong>中身の形を模した灰色のブロック</strong>を出す手法です。</p>
+<ul>
+<li><strong>知覚性能（perceived performance）の向上</strong> — 「何が来るか」が見えているので体感待ち時間が短い</li>
+<li><strong>CLS（Cumulative Layout Shift）の抑制</strong> — 先に高さ（<code>h-5</code>）を確保しておくので、データ到着時に画面がガタつかない。Google の Core Web Vitals の指標でもある</li>
+<li><code>animate-pulse</code> — Tailwind 組み込みの点滅アニメーション。「読み込み中である」ことを伝える</li>
+</ul>
+<p>ここでは中身が単なるプレースホルダーなので <code>key={i}</code>（インデックス）で問題ありません。</p>
+
+<div class="warn">
+<span class="lbl">ファイル名のタイポ</span>
+<p><span class="path">ChildListSkelton.tsx</span> — 正しくは <code>Skeleton</code> です。エクスポートされている関数名は <code>ChildListSkeleton</code>（正しい綴り）なので、<strong>ファイル名だけがズレている</strong>状態です。動作はしますが直したほうがよい点です。</p>
+</div>
+
+<h2>10-9. Calendar.tsx</h2>
+
+<pre><code>const Calendar = ({ year, month }: { year: number; month: number }) =&gt; {
+  const weeks = getWeeks(year, month);
+  const prev = new Date(year, month - 1, 1);
+  const next = new Date(year, month + 1, 1);</code></pre>
+
+<h3>props 設計 — プレゼンテーショナルコンポーネント</h3>
+<p><code>year</code> と <code>month</code> の<strong>数値2つだけ</strong>を受け取ります。「予定データ」も「取得関数」も受け取りません。</p>
+<ul>
+<li>純関数的（同じ props なら常に同じ出力）</li>
+<li>テストが極めて簡単</li>
+<li>Server Component のままでいられる（<code>"use client"</code> 不要 → JS バンドルに含まれない）</li>
+</ul>
+
+<h3>new Date(year, month - 1, 1) — 桁あふれの利用</h3>
+<p><code>month</code> が 0（1月）のとき <code>month - 1</code> は <code>-1</code> ですが、<code>new Date(2026, -1, 1)</code> は<strong>自動的に 2025年12月</strong>になります。<code>if (month === 0) { year--; month = 11 }</code> のような分岐が不要です。11 → 12 も同様に翌年1月になります。<strong>Date コンストラクタの正規化を利用した簡潔な書き方</strong>です。</p>
+
+<h3>テーブルによるカレンダー</h3>
+<p><code>&lt;table&gt;</code> / <code>&lt;thead&gt;</code> / <code>&lt;tbody&gt;</code> を使っているのは<strong>セマンティックに正しい</strong>選択です。カレンダーは本質的に「曜日 × 週」の2次元表なので、div のグリッドより意味が明確で、スクリーンリーダーにも構造が伝わります。</p>
+
+<table>
+<thead><tr><th style="width:38%">クラス</th><th style="width:62%">効果</th></tr></thead>
+<tbody>
+<tr><td><code>table-fixed</code></td><td>列幅を均等に固定（内容によって幅が変わらない）</td></tr>
+<tr><td><code>border-separate border-spacing-1.5</code></td><td>セル間に隙間を作り、カード状の見た目にする</td></tr>
+<tr><td><code>{date ? date.getDate() : ""}</code></td><td><code>getWeeks</code> が返した <code>null</code>（月外の平日）を空セルとして描画</td></tr>
+</tbody>
+</table>
+
+<h3>btnClass を変数に切り出す</h3>
+<p>Tailwind のクラス文字列が長くなるので変数化しています。前月・翌月の2箇所で使うので <strong>DRY</strong> になります。本格的にやるなら <code>cva</code> や <code>clsx</code> を使いますが、2箇所ならこれで十分です。</p>
+
+<h3>Link によるクライアントサイドナビゲーション</h3>
+<p><code>&lt;a&gt;</code> ではなく <code>next/link</code> の <code>&lt;Link&gt;</code> を使っています。<strong>ページ全体をリロードせず</strong>に遷移し、さらにビューポートに入った時点で<strong>遷移先をプリフェッチ</strong>します。前月／翌月の切り替えが体感で即座になります。</p>
+</section>
+
+<!-- ========================= 11 ========================= -->
+<section class="chapter">
+<h1><span class="num">11</span>型の流れ</h1>
+
+<p class="lead">このアプリで一番の技術的な芯は、<strong>型がどこから来てどこへ行くか</strong>です。源流が3つあり、それらを意図的に分離しています。</p>
+
+<div class="flow">① prisma/schema.prisma
+     ↓ prisma generate
+   src/generated/prisma/*   （Prisma.ChildCreateInput、Child モデル型…）
+     ↓
+   Repository の引数・戻り値
+
+② src/schemas/childSchema.ts （Zod）
+     ↓ z.infer
+   CreateChildInput
+     ↓                      ↓                      ↓
+   ChildForm の             postChild の           route.ts の
+   useForm&lt;T&gt;              引数の型               safeParse
+
+③ src/types/api.ts （手書きの API 契約）
+     ↓
+   Service の戻り値  ←→  useChildList の Promise&lt;T&gt;</div>
+
+<h2>11-1. ① と ③ を分けている理由</h2>
+
+<p><strong>① が DB のスキーマ、③ が API のスキーマ</strong>です。Service の <code>map</code> が ①→③ の変換点になっており、<strong>DB スキーマの変更が API に自動で漏れない</strong>構造になっています。</p>
+
+<div class="key">
+<span class="lbl">もし分けなかったら</span>
+<p><code>Child</code> テーブルに <code>medicalNote</code>（医療的ケアの記録）を追加した瞬間、<strong>API のレスポンスにも自動的に含まれて外部に出ます</strong>。分けていれば、明示的に <code>types/api.ts</code> と Service の <code>map</code> を変更しない限り漏れません。</p>
+</div>
+
+<h2>11-2. ② だけが実行時にも存在する</h2>
+
+<p>TypeScript の型は<strong>ビルド時に消えます</strong>。だから外部から来るデータ（HTTP ボディ、クエリパラメータ）は Zod で<strong>実行時に検証</strong>しなければ安全になりません。</p>
+
+<blockquote>
+<p><strong>型注釈は嘘をつけるが、Zod は嘘をつけない。</strong><br>
+<code>const body = await request.json() as CreateChildInput</code> と書いても、実際に何が入っているかは保証されません。<code>safeParse</code> だけが実際に中身を確認します。</p>
+</blockquote>
+
+<h2>11-3. types/api.ts — API 契約の明文化</h2>
+
+<pre><code>export type FieldError = { field: string; message: string; };
+
+export type Child = {
+  id: number; name: string; color: string;
+  contractDays: number; sortOrder: number;
+};
+
+export type ChildListResponse = {
+  data: Child[]; page: number; limit: number;
+  total: number; totalPages: number;
+};</code></pre>
+
+<p>この型が<strong>サーバー（Service の戻り値）とクライアント（<code>useChildList</code> の <code>Promise&lt;T&gt;</code>）の両方で使われている</strong>のがポイントです。同じリポジトリ内なので import 1本で共有でき、<strong>API の形が変わればサーバーとクライアントの両方でコンパイルエラーになります</strong>。実質的な型付き API クライアントとして機能しています。</p>
+</section>
+
+<!-- ========================= 12 ========================= -->
+<section class="chapter">
+<h1><span class="num">12</span>テスト</h1>
+
+<p class="lead">ファイル：<span class="path">src/lib/date.test.ts</span>。テスト対象の選び方とケースの選び方に、はっきりした方針があります。</p>
+
+<h2>12-1. なぜ date.ts だけをテストしているのか</h2>
+
+<p><span class="path">date.ts</span> は<strong>純粋関数（pure function）</strong>の集まりだからです。</p>
+<ul>
+<li>引数だけで結果が決まる（DB もネットワークも触らない）</li>
+<li>副作用がない</li>
+<li><strong>モックが一切不要</strong></li>
+</ul>
+
+<p>一方 Service や Route は DB やセッションに依存するので、テストにはモックやテスト用 DB の用意が必要です。</p>
+
+<div class="key">
+<span class="lbl">テストの費用対効果</span>
+<p><strong>「テストの費用対効果が最も高い純粋ロジックから書く」</strong>のは正しい優先順位です。そして <code>getWeeks</code> は<strong>このアプリで最も複雑でバグりやすいロジック</strong>なので、まさにテストすべき対象です。</p>
+</div>
+
+<h2>12-2. テストケースの選び方</h2>
+
+<table>
+<thead><tr><th style="width:52%">テスト</th><th style="width:48%">検証している性質</th></tr></thead>
+<tbody>
+<tr><td><code>toStr(new Date(2026,0,5))</code> → <code>"2026-01-05"</code></td><td>ゼロ埋めと月の +1</td></tr>
+<tr><td><code>getWeeks(2026, 7).length === 5</code></td><td>週の分割数</td></tr>
+<tr><td><code>getWeeks(2026, 8)[0][0] === null</code></td><td><strong>エッジケース</strong>：月初が月曜でない場合の穴埋め</td></tr>
+<tr><td>すべての週がちょうど5要素</td><td><strong>不変条件（invariant）</strong></td></tr>
+<tr><td><code>dateToDateStr(dateStrToDate(x)) === x</code></td><td><strong>ラウンドトリップ</strong></td></tr>
+</tbody>
+</table>
+
+<p>特に3つ目が<strong>エッジケース</strong>（2026年9月1日は火曜なので、最初の週の月曜が null になる）、4つ目が<strong>不変条件テスト</strong>（個別の値ではなく「常に成り立つ性質」を検証）です。この選び方は良質です。</p>
+
+<h2>12-3. AAA / BDD スタイル</h2>
+<p><code>describe</code>（何をテストするか）→ <code>it</code>（どういう振る舞いか）→ <code>expect</code>（何を期待するか）という <strong>BDD スタイル</strong>です。テスト名が日本語で書かれているので、<strong>テスト結果がそのまま仕様書として読めます</strong>。</p>
+
+<h2>12-4. vitest.config.ts の設定</h2>
+<pre><code>resolve: { tsconfigPaths: true }</code></pre>
+<p>テストファイル内の <code>@/lib/date</code> という<strong>パスエイリアス</strong>を Vitest に解決させる設定です。これがないと import が失敗します。</p>
+</section>
+
+<!-- ========================= 13 ========================= -->
+<section class="chapter">
+<h1><span class="num">13</span>ツール・設定まわり</h1>
+
+<table>
+<thead><tr><th style="width:30%">ファイル</th><th style="width:70%">役割</th></tr></thead>
+<tbody>
+<tr><td><span class="path">tsconfig.json</span></td><td><code>"strict": true</code> で null チェック等を全部有効化。<code>paths: { "@/*": ["./src/*"] }</code> で <code>../../../lib/x</code> を <code>@/lib/x</code> にする<strong>パスエイリアス</strong></td></tr>
+<tr><td><span class="path">eslint.config.mjs</span></td><td>Flat Config 形式。バグになりうる書き方を静的検出</td></tr>
+<tr><td><span class="path">.prettierrc</span></td><td>フォーマット統一。<code>prettier-plugin-tailwindcss</code> が<strong>Tailwind クラスを公式推奨順に自動並べ替え</strong>する</td></tr>
+<tr><td><span class="path">postcss.config.mjs</span></td><td>Tailwind v4 を PostCSS プラグインとして読み込む</td></tr>
+<tr><td><span class="path">prisma.config.ts</span></td><td>Prisma 7 の新しい設定ファイル。<code>dotenv/config</code> で <code>.env</code> を読む</td></tr>
+<tr><td><span class="path">vitest.config.ts</span></td><td>パスエイリアスの解決設定</td></tr>
+<tr><td><span class="path">next.config.ts</span></td><td>現状は空。設定は TypeScript で型付きで書ける</td></tr>
+</tbody>
+</table>
+
+<h2>13-1. postinstall: prisma generate</h2>
+<p><code>npm install</code> 後に<strong>自動で Prisma Client を生成</strong>します。これにより、生成物を Git にコミットしない運用が可能になります。デプロイ先でも <code>npm ci</code> するだけで型が揃います。</p>
+
+<h2>13-2. output = "../src/generated/prisma"</h2>
+<p>Prisma 7 では生成先を <code>node_modules</code> ではなく<strong>明示的なパス</strong>に出すのが標準になりました。<code>node_modules</code> に隠れないので、生成された型をエディタで直接読めます。ただし <code>src</code> 配下なので、<code>.gitignore</code> の扱いには注意が必要な部分です。</p>
+
+<h2>13-3. npm scripts</h2>
+
+<table>
+<thead><tr><th style="width:26%">コマンド</th><th style="width:74%">内容</th></tr></thead>
+<tbody>
+<tr><td><code>npm run dev</code></td><td>開発サーバー起動</td></tr>
+<tr><td><code>npm run build</code></td><td>本番ビルド</td></tr>
+<tr><td><code>npm run typecheck</code></td><td><code>tsc --noEmit</code>。型エラーだけを検査</td></tr>
+<tr><td><code>npm run lint</code></td><td>ESLint</td></tr>
+<tr><td><code>npm run format</code></td><td>Prettier で <code>src</code> を整形</td></tr>
+<tr><td><code>npm test</code></td><td>Vitest（ウォッチモード）</td></tr>
+<tr><td><code>npm run test:run</code></td><td>Vitest（1回だけ実行。CI 向け）</td></tr>
+</tbody>
+</table>
+
+<p><code>test</code> と <code>test:run</code> を分けているのがポイントです。<strong>ウォッチモードは CI で無限に止まらなくなる</strong>ため、CI では <code>test:run</code> を使います。</p>
+</section>
+
+<!-- ========================= 14 ========================= -->
+<section class="chapter">
+<h1><span class="num">14</span>未完成部分・改善点</h1>
+
+<p class="lead">説明する際、ここを自分から挙げられると理解の深さと誠実さが伝わります。「知らない」のではなく「認識した上で優先順位をつけている」ことを示せます。</p>
+
+<table>
+<thead><tr><th style="width:32%">項目</th><th style="width:68%">内容</th></tr></thead>
+<tbody>
+<tr><td><strong>Attendance が UI につながっていない</strong></td><td><code>/api/attendances</code> と <code>getMonthlyAttendances</code> は完成しているが、<span class="path">Calendar.tsx</span> は日付を描画するだけで予定を表示していない。<strong>次の実装ステップはここ</strong></td></tr>
+<tr><td><strong>Attendance の書き込み API がない</strong></td><td>GET のみ。予定を登録するには POST / PUT（<code>upsert</code>）が必要。<code>@@unique([date, childId])</code> はその準備</td></tr>
+<tr><td>タイムゾーンの不整合</td><td>第6章 6-4 で述べた <code>toStr</code> / <code>dateToDateStr</code> の混在。JST でのみ正しく動く状態</td></tr>
+<tr><td><span class="path">page.tsx</span> のデッドコード</td><td>関数末尾の <code>redirect("/login")</code> は <code>return</code> の後ろにあり<strong>絶対に実行されない</strong>。削除すべき</td></tr>
+<tr><td><span class="path">Counter.tsx</span> が未使用</td><td>学習用の残骸。削除候補</td></tr>
+<tr><td><code>?limit=100</code> のハードコード</td><td><span class="path">useChildList.ts</span> がページネーションを使っていない。API 側は対応済みなので、児童数が増えたら繋ぐ</td></tr>
+<tr><td><code>approved</code> の管理画面がない</td><td>現状は DB を直接操作する必要がある。管理者用 UI が必要</td></tr>
+<tr><td><code>defaultTimeFrame</code> が未使用</td><td>スキーマにはあるがロジックで参照されていない</td></tr>
+<tr><td><span class="path">globals.css</span> の font-family</td><td><code>next/font</code> で Geist を読み込んでいるのに、body で <code>Arial</code> を直接指定して上書きしている。<code>font-sans</code> を使うべき</td></tr>
+<tr><td>ファイル名タイポ</td><td><span class="path">ChildListSkelton.tsx</span> → <code>Skeleton</code></td></tr>
+<tr><td>Child の更新・削除 API</td><td>現状 POST（作成）と GET（一覧）のみ。PATCH / DELETE が未実装</td></tr>
+</tbody>
+</table>
+
+<h2>14-1. 優先順位をつけるなら</h2>
+
+<ol>
+<li><strong>Attendance の POST（upsert）＋ Calendar への表示</strong> — アプリの主目的そのもの。ここが動いて初めて「予定表」になる</li>
+<li><strong>タイムゾーンの統一</strong> — 日付アプリの根幹。潜在バグとして最も危険</li>
+<li><strong><code>approved</code> の管理 UI</strong> — 運用に必須</li>
+<li>デッドコード・タイポの整理 — コストが低く、すぐ終わる</li>
+<li>ページネーションの接続 — 児童数が増えてから</li>
+</ol>
+</section>
+
+<!-- ========================= 15 ========================= -->
+<section class="chapter">
+<h1><span class="num">15</span>まとめ</h1>
+
+<h2>15-1. この設計を一言で説明するなら</h2>
+
+<blockquote>
+<p><strong>「型と制約を上流に置き、下流を安全にする」設計。</strong></p>
+<ul style="margin-top:3mm;margin-bottom:0;">
+<li>DB のユニーク制約が重複を防ぎ、</li>
+<li>Zod スキーマ1つが型・クライアント検証・サーバー検証の3役をこなし、</li>
+<li>レイヤー分割で各層の責務を限定し、</li>
+<li>React Query の queryKey がコンポーネント間を疎結合につなぎ、</li>
+<li>URL がアプリの状態を持つことで状態管理コードを不要にしている。</li>
+</ul>
+</blockquote>
+
+<p>説明を求められたときは、この5行を軸に「どの部分の話ですか？」と展開していけば筋が通ります。</p>
+
+<h2>15-2. 貫いている3つの原則</h2>
+
+<h3>原則1：チェックはできるだけ上流（外側）で行う</h3>
+<p>DB の制約 → Zod スキーマ → 型システム、という順に「後から破れない場所」に条件を置いています。アプリのコードで <code>if</code> を書くのは最後の手段です。</p>
+
+<h3>原則2：1つの定義から複数の用途を導出する</h3>
+<ul>
+<li>Prisma スキーマ → DB テーブル ＋ TypeScript 型 ＋ マイグレーション</li>
+<li>Zod スキーマ → 実行時検証 ＋ TypeScript 型 ＋ エラーメッセージ</li>
+</ul>
+<p>手で二重管理する箇所を徹底的に減らしています。</p>
+
+<h3>原則3：知らなくていいことは知らせない</h3>
+<ul>
+<li>Service は HTTP を知らない</li>
+<li>Repository は業務ルールを知らない</li>
+<li>ChildForm は ChildList を知らない（queryKey だけで繋がる）</li>
+<li>API は DB のカラム構成を外に出さない（DTO）</li>
+</ul>
+
+<h2>15-3. 説明の難所と、その乗り切り方</h2>
+
+<table>
+<thead><tr><th style="width:30%">難所</th><th style="width:70%">説明の切り口</th></tr></thead>
+<tbody>
+<tr><td><code>getWeeks</code> の週分割</td><td>「<strong>その日が属する週の月曜日を計算して、それをグルーピングのキーにしている</strong>」の1文から始める。あとは「なぜ null で5マス埋めるか＝曜日とインデックスを対応させるため」を足す</td></tr>
+<tr><td>React Query のキャッシュ無効化</td><td>「<strong>ChildForm と ChildList は互いを知らない。queryKey という共通の名前だけで繋がっている</strong>」と言い切る</td></tr>
+<tr><td>Server / Client 境界</td><td>「<strong>import した子は Client になるが、children で渡した子はならない</strong>」を先に言う</td></tr>
+<tr><td>Zod と型の関係</td><td>「<strong>TypeScript の型はビルド時に消えるので、外から来るデータは実行時に検証しないと意味がない</strong>」</td></tr>
+<tr><td>なぜ層を分けるのか</td><td>「<strong>Service は Request を受け取らないので、テストで HTTP を用意しなくても呼べる</strong>」という具体的な利益で答える</td></tr>
+<tr><td>401 と 403</td><td>「<strong>401 はあなたが誰か分からない、403 は誰かは分かるが権限がない</strong>」</td></tr>
+</tbody>
+</table>
+
+<hr>
+
+<p style="text-align:center;color:var(--ink-faint);font-size:9pt;margin-top:10mm;">
+— 本書は schedule-next のソースコード全ファイルに基づいて作成されています —
+</p>
+</section>
+
+</body>
+</html>
