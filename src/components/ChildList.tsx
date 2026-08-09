@@ -1,7 +1,8 @@
 "use client";
 
 import { useChildList } from "@/hooks/useChildList";
-import { ChildListSkeleton } from "./ChildListSkelton";
+import { ChildListSkeleton } from "./ChildListSkeleton";
+import { ChildRow } from "./ChildRow";
 
 export function ChildList() {
   const { data, isPending, isError } = useChildList();
@@ -12,9 +13,7 @@ export function ChildList() {
   return (
     <ul>
       {data.data.map((child) => (
-        <li key={child.id} style={{ color: child.color }}>
-          {child.name}（契約 {child.contractDays} 日）
-        </li>
+        <ChildRow key={child.id} child={child} />
       ))}
     </ul>
   );

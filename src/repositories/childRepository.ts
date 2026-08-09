@@ -16,3 +16,7 @@ export function countChildren() {
 export function findChildById(id: number) {
   return prisma.child.findUnique({ where: { id } });
 }
+
+export function updateChild(id: number, data: Prisma.ChildUpdateInput) {
+  return prisma.child.update({ where: { id }, data });
+}

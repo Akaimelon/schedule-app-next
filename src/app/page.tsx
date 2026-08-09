@@ -1,7 +1,6 @@
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
-import { ChildList } from "@/components/ChildList";
-import { ChildForm } from "@/components/ChildForm";
+import { ChildPanel } from "@/components/ChildPanel";
 import { DayModal } from "@/components/DayModal";
 import Calendar from "@/components/Calendar";
 
@@ -29,8 +28,7 @@ export default async function Home({
       >
         <button type="submit">ログアウト</button>
       </form>
-      <ChildList />
-      <ChildForm />
+      <ChildPanel />
       <Calendar year={year} month={month} />
       <DayModal />
     </>
