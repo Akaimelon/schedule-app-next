@@ -10,6 +10,7 @@ import {
   registerAttendance,
 } from "@/services/attendanceService";
 import { createLogger } from "@/lib/logger";
+import { readJsonBody } from "@/lib/apiError";
 
 export async function GET(request: Request) {
   const authResult = await requireApprovedUser();
@@ -48,7 +49,13 @@ export async function POST(request: Request) {
     );
   }
 
-  const body = await request.json();
+  const body = await readJsonBody(request);
+  if (body === null) {
+    return Response.json(
+      { error: "リクエストの形式が不正です" },
+      { status: 400 },
+    );
+  }
   const parsed = attendanceBodySchema.safeParse(body);
 
   if (!parsed.success) {
@@ -78,7 +85,13 @@ export async function DELETE(request: Request) {
       { status: authResult.status },
     );
   }
-  const body = await request.json();
+  const body = await readJsonBody(request);
+  if (body === null) {
+    return Response.json(
+      { error: "リクエストの形式が不正です" },
+      { status: 400 },
+    );
+  }
   const parsed = attendanceBodySchema.safeParse(body);
 
   if (!parsed.success) {
@@ -88,8 +101,9 @@ export async function DELETE(request: Request) {
     });
     return Response.json({ errors }, { status: 400 });
   }
-  logger("info", "attendance.cancel.success", { childId: parsed.data.childId });
+
   await cancelAttendance(parsed.data);
+  logger("info", "attendance.cancel.success", { childId: parsed.data.childId });
 
   return new Response(null, { status: 204 });
 }

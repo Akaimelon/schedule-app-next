@@ -3,6 +3,7 @@ import { createChildSchema, childListQuerySchema } from "@/schemas/childSchema";
 import { createLogger } from "@/lib/logger";
 import { toFieldErrors } from "@/lib/apiError";
 import { requireApprovedUser } from "@/lib/requireApprovedUser";
+import { readJsonBody } from "@/lib/apiError";
 
 export async function GET(request: Request) {
   const authResult = await requireApprovedUser();
@@ -38,7 +39,10 @@ export async function POST(request: Request) {
   }
 
   logger("info", "child.create.start");
-  const body = await request.json();
+  const body = await readJsonBody(request);
+if (body === null) {
+  return Response.json({ error: "リクエストの形式が不正です" }, { status: 400 });
+}
   const parsed = createChildSchema.safeParse(body);
 
   if (!parsed.success) {

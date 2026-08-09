@@ -33,6 +33,4 @@ export default async function Home({
       <DayModal />
     </>
   );
-
-  redirect("/login");
 }

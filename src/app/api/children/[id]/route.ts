@@ -3,6 +3,7 @@ import { createLogger } from "@/lib/logger";
 import { updateChildSchema } from "@/schemas/childSchema";
 import { toFieldErrors } from "@/lib/apiError";
 import { editChild } from "@/services/childService";
+import { readJsonBody } from "@/lib/apiError";
 
 export async function PATCH(
   request: Request,
@@ -25,7 +26,10 @@ export async function PATCH(
     return Response.json({ error: "IDが不正です" }, { status: 400 });
   }
 
-  const body = await request.json();
+  const body = await readJsonBody(request);
+if (body === null) {
+  return Response.json({ error: "リクエストの形式が不正です" }, { status: 400 });
+}
   const parsed = updateChildSchema.safeParse(body);
 
   if (!parsed.success) {
