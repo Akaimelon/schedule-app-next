@@ -6,7 +6,11 @@ export function createChild(data: Prisma.ChildCreateInput) {
 }
 
 export function findChildren({ skip, take }: { skip: number; take: number }) {
-  return prisma.child.findMany({ skip, take, orderBy: { sortOrder: "asc" } });
+  return prisma.child.findMany({
+    skip,
+    take,
+    orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+  });
 }
 
 export function countChildren() {
@@ -19,4 +23,11 @@ export function findChildById(id: number) {
 
 export function updateChild(id: number, data: Prisma.ChildUpdateInput) {
   return prisma.child.update({ where: { id }, data });
+}
+
+export async function findMaxSortOrder() {
+  const result = await prisma.child.aggregate({
+    _max: { sortOrder: true },
+  });
+  return result._max.sortOrder;
 }

@@ -23,13 +23,20 @@ async function sendAttendance(
   }
 }
 
+function attendanceQueryKey(date: string) {
+  const [year, month] = date.split("-").map(Number);
+  return ["attendances", year, month];
+}
+
 export function useRegisterAttendance() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (input: AttendanceInput) => sendAttendance("POST", input),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["attendances"] });
+    onSuccess: (_data, input) => {
+      queryClient.invalidateQueries({
+        queryKey: attendanceQueryKey(input.date),
+      });
     },
     onError: (error) => toast.error(error.message),
   });
@@ -40,8 +47,10 @@ export function useCancelAttendance() {
 
   return useMutation({
     mutationFn: (input: AttendanceInput) => sendAttendance("DELETE", input),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["attendances"] });
+    onSuccess: (_data, input) => {
+      queryClient.invalidateQueries({
+        queryKey: attendanceQueryKey(input.date),
+      });
     },
     onError: (error) => toast.error(error.message),
   });

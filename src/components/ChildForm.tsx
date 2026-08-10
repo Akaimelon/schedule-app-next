@@ -20,7 +20,6 @@ export function ChildForm() {
       name: "",
       color: "#4a86c4",
       contractDays: 0,
-      sortOrder: 0,
     },
   });
   const addChild = useAddChild();
@@ -48,14 +47,6 @@ export function ChildForm() {
       <div>
         <input type="color" {...register("color")} />
         {errors.color && <p>{errors.color.message}</p>}
-      </div>
-
-      <div>
-        <input
-          type="number"
-          {...register("sortOrder", { valueAsNumber: true })}
-        />
-        {errors.sortOrder && <p>{errors.sortOrder.message}</p>}
       </div>
 
       <button type="submit" disabled={addChild.isPending}>

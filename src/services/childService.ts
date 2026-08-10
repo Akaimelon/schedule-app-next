@@ -4,10 +4,10 @@ import {
   countChildren,
   findChildById,
   updateChild,
+  findMaxSortOrder,
 } from "@/repositories/childRepository";
-import { Prisma } from "@/generated/prisma/client";
-import { Child } from "@/types/api";
-import { UpdateChildInput } from "@/schemas/childSchema";
+import { Child, ChildListResponse } from "@/types/api";
+import { UpdateChildInput, CreateChildInput } from "@/schemas/childSchema";
 
 export async function getChildList({
   page,
@@ -15,7 +15,7 @@ export async function getChildList({
 }: {
   page: number;
   limit: number;
-}) {
+}): Promise<ChildListResponse> {
   const skip = (page - 1) * limit;
   const [childList, total] = await Promise.all([
     findChildren({ skip, take: limit }),
@@ -39,8 +39,12 @@ export async function getChildList({
   };
 }
 
-export async function addChild(input: Prisma.ChildCreateInput) {
-  const newChild = await createChild(input);
+export async function addChild(input: CreateChildInput): Promise<Child> {
+  const maxSortOrder = await findMaxSortOrder();
+  const newChild = await createChild({
+    ...input,
+    sortOrder: (maxSortOrder ?? -1) + 1,
+  });
   return {
     id: newChild.id,
     name: newChild.name,
