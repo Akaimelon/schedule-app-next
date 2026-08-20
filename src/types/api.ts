@@ -9,6 +9,7 @@ export type Child = {
   color: string;
   contractDays: number;
   sortOrder: number;
+  defaultTimeFrame: "AM" | "PM" | null;
 };
 
 export type ChildListResponse = {

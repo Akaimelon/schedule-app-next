@@ -28,6 +28,7 @@ export async function getChildList({
     color: child.color,
     contractDays: child.contractDays,
     sortOrder: child.sortOrder,
+    defaultTimeFrame: child.defaultTimeFrame,
   }));
 
   return {
@@ -51,6 +52,7 @@ export async function addChild(input: CreateChildInput): Promise<Child> {
     color: newChild.color,
     contractDays: newChild.contractDays,
     sortOrder: newChild.sortOrder,
+    defaultTimeFrame: newChild.defaultTimeFrame,
   };
 }
 
@@ -73,6 +75,7 @@ export async function editChild(
       color: updatedChild.color,
       contractDays: updatedChild.contractDays,
       sortOrder: updatedChild.sortOrder,
+      defaultTimeFrame: updatedChild.defaultTimeFrame,
     },
   };
 }

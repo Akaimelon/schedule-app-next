@@ -40,9 +40,12 @@ export async function POST(request: Request) {
 
   logger("info", "child.create.start");
   const body = await readJsonBody(request);
-if (body === null) {
-  return Response.json({ error: "リクエストの形式が不正です" }, { status: 400 });
-}
+  if (body === null) {
+    return Response.json(
+      { error: "リクエストの形式が不正です" },
+      { status: 400 },
+    );
+  }
   const parsed = createChildSchema.safeParse(body);
 
   if (!parsed.success) {

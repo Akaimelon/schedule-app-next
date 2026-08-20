@@ -1,13 +1,14 @@
 "use client";
 
+import { AttendancePatchInput } from "@/schemas/attendanceSchema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 type AttendanceInput = { date: string; childId: number };
 
 async function sendAttendance(
-  method: "POST" | "DELETE",
-  input: AttendanceInput,
+  method: "POST" | "DELETE" | "PATCH",
+  input: AttendancePatchInput,
 ) {
   const res = await fetch("/api/attendances", {
     method,
@@ -47,6 +48,20 @@ export function useCancelAttendance() {
 
   return useMutation({
     mutationFn: (input: AttendanceInput) => sendAttendance("DELETE", input),
+    onSuccess: (_data, input) => {
+      queryClient.invalidateQueries({
+        queryKey: attendanceQueryKey(input.date),
+      });
+    },
+    onError: (error) => toast.error(error.message),
+  });
+}
+
+export function useUpdateAttendance() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: AttendancePatchInput) => sendAttendance("PATCH", input),
     onSuccess: (_data, input) => {
       queryClient.invalidateQueries({
         queryKey: attendanceQueryKey(input.date),

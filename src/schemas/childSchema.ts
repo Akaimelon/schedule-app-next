@@ -9,6 +9,7 @@ export const createChildSchema = z.object({
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/, "色は #RRGGBB 形式で指定してください"),
   contractDays: z.number().int().min(0).max(13),
+  defaultTimeFrame: z.enum(["AM", "PM"]).nullable(),
 });
 
 export type CreateChildInput = z.infer<typeof createChildSchema>;

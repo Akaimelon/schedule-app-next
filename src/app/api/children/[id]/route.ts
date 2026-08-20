@@ -27,9 +27,12 @@ export async function PATCH(
   }
 
   const body = await readJsonBody(request);
-if (body === null) {
-  return Response.json({ error: "リクエストの形式が不正です" }, { status: 400 });
-}
+  if (body === null) {
+    return Response.json(
+      { error: "リクエストの形式が不正です" },
+      { status: 400 },
+    );
+  }
   const parsed = updateChildSchema.safeParse(body);
 
   if (!parsed.success) {
@@ -47,5 +50,5 @@ if (body === null) {
   }
 
   logger("info", "child.update.success", { childId: id });
-  return Response.json(result.child)
+  return Response.json(result.child);
 }

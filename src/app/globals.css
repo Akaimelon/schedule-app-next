@@ -19,6 +19,9 @@
 }
 
 body {
+  font-family:
+    var(--font-rounded), "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo",
+    sans-serif;
   background: var(--color-cream);
   color: var(--color-ink);
   font-size: 14px;

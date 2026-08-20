@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Providers } from "@/components/Providers" 
+import { M_PLUS_Rounded_1c } from "next/font/google";
+import { Providers } from "@/components/Providers";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const rounded = M_PLUS_Rounded_1c({
+  weight: ["400", "500", "700", "800"],
+  preload: false,
+  display: "swap",
+  variable: "--font-rounded",
 });
 
 export const metadata: Metadata = {
@@ -24,11 +21,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="ja"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="flex min-h-full flex-col"><Providers>{children}</Providers></body>
+    <html lang="ja" className={`${rounded.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

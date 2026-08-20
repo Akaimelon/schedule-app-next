@@ -20,6 +20,7 @@ export function ChildForm() {
       name: "",
       color: "#4a86c4",
       contractDays: 0,
+      defaultTimeFrame: null,
     },
   });
   const addChild = useAddChild();

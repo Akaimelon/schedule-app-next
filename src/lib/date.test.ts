@@ -15,14 +15,13 @@ describe("getWeeks", () => {
 
 describe("getWeeks", () => {
   it("最初の週の月曜が null である", () => {
-   expect(getWeeks(2026, 8)[0][0]).toBe(null)
+    expect(getWeeks(2026, 8)[0][0]).toBe(null);
   });
 });
 
-
 describe("getWeeks", () => {
   it("各週がちょうど5要素", () => {
-   expect(getWeeks(2026, 7).every((w) => w.length === 5)).toBe(true)
+    expect(getWeeks(2026, 7).every((w) => w.length === 5)).toBe(true);
   });
 });
 
