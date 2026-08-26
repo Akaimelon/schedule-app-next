@@ -17,7 +17,6 @@ import {
 } from "@/constants";
 import { Attendance } from "@/types/api";
 
-
 const TOGGLE_ACTIVE: Record<TransportKey, string> = {
   AM: "border-[#7cc1e8] bg-[#e2f3fc] text-[#2a7fb0]",
   PM: "border-[#e9a668] bg-[#fcebd6] text-[#c2742a]",

@@ -21,6 +21,10 @@ export function findChildById(id: number) {
   return prisma.child.findUnique({ where: { id } });
 }
 
+export function findAllChildId() {
+  return prisma.child.findMany({ select: { id: true } });
+}
+
 export function updateChild(id: number, data: Prisma.ChildUpdateInput) {
   return prisma.child.update({ where: { id }, data });
 }
@@ -30,4 +34,19 @@ export async function findMaxSortOrder() {
     _max: { sortOrder: true },
   });
   return result._max.sortOrder;
+}
+
+export function deleteChild(id: number) {
+  return prisma.child.delete({ where: { id } });
+}
+
+export function reorderChildren(ids: number[]) {
+  return prisma.$transaction(
+    ids.map((id, index) =>
+      prisma.child.update({
+        where: { id },
+        data: { sortOrder: index },
+      }),
+    ),
+  );
 }

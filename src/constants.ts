@@ -19,6 +19,13 @@ export type TransportKey = (typeof TRANSPORT_OPTIONS)[number]["key"];
 //契約上の利用定員が10のため
 export const MAX_PER_DAY = 10;
 
+export const MAX_CONTRACT_PER_MONTH = 13;
+
+export const CONTRACT_PER_MONTH_OPTIONS = Array.from(
+  { length: MAX_CONTRACT_PER_MONTH + 1 },
+  (_, i) => i,
+);
+
 export const CHILD_COLORS = [
   "#000000",
   "#C44040",

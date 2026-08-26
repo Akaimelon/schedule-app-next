@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_CONTRACT_PER_MONTH } from "@/constants";
 
 export const createChildSchema = z.object({
   name: z
@@ -8,7 +9,11 @@ export const createChildSchema = z.object({
   color: z
     .string()
     .regex(/^#[0-9a-fA-F]{6}$/, "色は #RRGGBB 形式で指定してください"),
-  contractDays: z.number().int().min(0).max(13),
+  contractDays: z
+    .number()
+    .int("整数で入力してください")
+    .min(0, "0以上で入力してください")
+    .max(MAX_CONTRACT_PER_MONTH, `${MAX_CONTRACT_PER_MONTH}日までです`),
   defaultTimeFrame: z.enum(["AM", "PM"]).nullable(),
 });
 
@@ -21,3 +26,7 @@ export const childListQuerySchema = z.object({
 
 export const updateChildSchema = createChildSchema.partial();
 export type UpdateChildInput = z.infer<typeof updateChildSchema>;
+
+export const reorderChildrenSchema = z.object({
+  ids: z.array(z.number().int().positive()).min(1),
+});

@@ -1,6 +1,12 @@
+"use client";
+
 import Image from "next/image";
+import { UsersIcon } from "@/components/Icon";
+import { useUiStore } from "@/stores/useUiStore";
 
 export function Header() {
+  const openChildModal = useUiStore((s) => s.openChildModal);
+
   return (
     <header className="mb-5.5 flex items-start justify-between gap-6 max-[980px]:flex-col max-[980px]:items-stretch">
       <div className="flex items-center gap-4">
@@ -19,6 +25,15 @@ export function Header() {
             月間スケジュールを管理し、子どもたちの利用状況を把握しましょう
           </div>
         </div>
+      </div>
+      <div className="flex gap-4">
+        <button
+          className="text-accent inline-flex cursor-pointer items-center gap-2 rounded-xl border-[1.5px] border-[#6ea8dc] bg-white px-4 py-2.75 text-sm font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors duration-120 hover:bg-[#f3f8fd]"
+          onClick={openChildModal}
+        >
+          <UsersIcon />
+          子供管理
+        </button>
       </div>
     </header>
   );

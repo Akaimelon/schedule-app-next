@@ -4,6 +4,7 @@ import { ChildPanel } from "@/components/ChildPanel";
 import { DayModal } from "@/components/DayModal";
 import Calendar from "@/components/Calendar";
 import { Header } from "@/components/Header";
+import { ChildManageModal } from "@/components/ChildManageModal";
 
 export default async function Home({
   searchParams,
@@ -33,19 +34,17 @@ export default async function Home({
       <Header />
 
       <div className="flex items-start gap-4 max-[980px]:flex-col">
-        {/* カード1：カレンダー */}
-
         <div className="border-line min-w-0 flex-1 rounded-[18px] border bg-white px-3 py-3.5 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
           <Calendar year={year} month={month} />
         </div>
 
-        {/* カード2：サイドバー */}
         <aside className="border-line w-72 flex-none rounded-[18px] border bg-white px-3.5 py-4 shadow-[0_2px_10px_rgba(0,0,0,0.03)] max-[980]:w-full">
           <ChildPanel />
         </aside>
       </div>
 
       <DayModal />
+      <ChildManageModal />
     </div>
   );
 }

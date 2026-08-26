@@ -5,6 +5,9 @@ import {
   findChildById,
   updateChild,
   findMaxSortOrder,
+  deleteChild,
+  findAllChildId,
+  reorderChildren,
 } from "@/repositories/childRepository";
 import { Child, ChildListResponse } from "@/types/api";
 import { UpdateChildInput, CreateChildInput } from "@/schemas/childSchema";
@@ -78,4 +81,38 @@ export async function editChild(
       defaultTimeFrame: updatedChild.defaultTimeFrame,
     },
   };
+}
+
+export async function removeChild(
+  id: number,
+): Promise<{ ok: false; status: number; message: string } | { ok: true }> {
+  const child = await findChildById(id);
+  if (!child) {
+    return { ok: false, status: 404, message: "子供が見つかりません" };
+  }
+
+  await deleteChild(id);
+  return { ok: true };
+}
+
+export async function reorderChildList(
+  ids: number[],
+): Promise<{ ok: false; status: number; message: string } | { ok: true }> {
+  const existing = await findAllChildId();
+  const existingIds = new Set(existing.map((c) => c.id));
+
+  const hasDuplicate = new Set(ids).size !== ids.length;
+  const countMismatch = ids.length !== existingIds.size;
+  const hasUnknown = !ids.every((id) => existingIds.has(id));
+
+  if (hasDuplicate || countMismatch || hasUnknown) {
+    return {
+      ok: false,
+      status: 409,
+      message: "子供一覧が変わっています。画面を再読み込みしてください",
+    };
+  }
+
+  await reorderChildren(ids);
+  return { ok: true };
 }

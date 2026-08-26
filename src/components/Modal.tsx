@@ -1,27 +1,41 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
+
+const openModals: object[] = [];
 
 export const Modal = ({
   title,
   onClose,
   panelClass,
+  footer,
   children,
 }: {
   title: string;
   onClose: () => void;
   panelClass?: string;
+  footer?: React.ReactNode;
   children: React.ReactNode;
 }) => {
   const pressedOnOverlay = useRef(false);
+  const handleClose = useEffectEvent(() => onClose());
 
   useEffect(() => {
+    const token = {};
+    openModals.push(token);
+
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key !== "Escape") return;
+      if (openModals[openModals.length - 1] !== token) return;
+      handleClose();
     };
+
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose]);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      openModals.splice(openModals.indexOf(token), 1);
+    };
+  }, []);
 
   return (
     <div
@@ -51,6 +65,7 @@ export const Modal = ({
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-5 py-4">{children}</div>
+        {footer}
       </div>
     </div>
   );
