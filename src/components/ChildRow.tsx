@@ -7,6 +7,8 @@ import { useUpdateChild } from "@/hooks/useUpdateChild";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ColorSwatches } from "@/components/ColorSwatches";
 import { CONTRACT_PER_MONTH_OPTIONS, TIME_OPTIONS } from "@/constants";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import type { Child } from "@/types/api";
 
 const INPUT_CLASS =
@@ -27,6 +29,15 @@ export function ChildRow({ child }: { child: Child }) {
   const deleteChild = useDeleteChild();
   const [confirming, setConfirming] = useState(false);
 
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: child.id });
+
   useEffect(() => {
     if (debouncedName === lastSaved.current) return;
 
@@ -36,10 +47,23 @@ export function ChildRow({ child }: { child: Child }) {
 
   return (
     <li
-      className="border-line mb-2 grid items-center gap-2 rounded-xl border bg-white px-3 py-2.5"
-      style={{ gridTemplateColumns: CHILD_GRID_COLS }}
+      ref={setNodeRef}
+      className={`mb-2 grid items-center gap-2 rounded-xl border px-3 py-2.5 ${
+        isDragging
+          ? "border-[#6ea8dc] bg-[#eaf2fb] shadow-[inset_0_0_0_1px_rgba(74,134,196,0.18)]"
+          : "border-line bg-white"
+      }`}
+      style={{
+        gridTemplateColumns: CHILD_GRID_COLS,
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
     >
-      <div className="text-ink-muted flex cursor-grab items-center justify-center select-none">
+      <div
+        {...attributes}
+        {...listeners}
+        className="text-ink-muted flex cursor-grab touch-none items-center justify-center select-none active:cursor-grabbing"
+      >
         ⋮⋮
       </div>
 
