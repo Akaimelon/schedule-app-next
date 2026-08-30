@@ -1,9 +1,9 @@
 import { auth, signOut } from "@/auth";
 import { redirect } from "next/navigation";
-import { ChildPanel } from "@/components/ChildPanel";
 import { DayModal } from "@/components/DayModal";
 import Calendar from "@/components/Calendar";
 import { Header } from "@/components/Header";
+import { Sidebar } from "@/components/Sidebar";
 import { ChildManageModal } from "@/components/ChildManageModal";
 
 export default async function Home({
@@ -39,7 +39,7 @@ export default async function Home({
         </div>
 
         <aside className="border-line w-72 flex-none rounded-[18px] border bg-white px-3.5 py-4 shadow-[0_2px_10px_rgba(0,0,0,0.03)] max-[980]:w-full">
-          <ChildPanel />
+           <Sidebar year={year} month={month} />
         </aside>
       </div>
 
