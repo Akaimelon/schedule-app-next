@@ -19,3 +19,10 @@ export const attendancePatchSchema = attendanceBodySchema.extend({
 });
 
 export type AttendancePatchInput = z.infer<typeof attendancePatchSchema>;
+
+export const copyMonthSchema = z.object({
+  year: z.int().min(2000).max(2100),
+  month: z.int().min(1).max(12),
+});
+
+export type CopyMonthInput = z.infer<typeof copyMonthSchema>;

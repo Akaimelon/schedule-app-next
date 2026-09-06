@@ -33,3 +33,27 @@ export function dateStrToDate(dateStr: string): Date {
 export function dateToDateStr(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
+
+export function dateStrToLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+export function getWeekdayOccurrence(date: Date): number {
+  return Math.floor((date.getDate() - 1) / 7) + 1;
+}
+
+export function findNthWeekday(
+  year: number,
+  month: number,
+  weekday: number,
+  n: number,
+): Date | null {
+  const firstOfWeek = new Date(year, month, 1).getDay();
+  const lastDay = new Date(year, month + 1, 0).getDate();
+
+  const offset = (weekday - firstOfWeek + 7) % 7;
+  const day = 1 + offset + 7 * (n - 1);
+
+  return day > lastDay ? null : new Date(year, month, day);
+}

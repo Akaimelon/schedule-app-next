@@ -48,3 +48,12 @@ export function updateAttendance(
 export function countAttendanceByDate(date: Date) {
   return prisma.attendance.count({ where: { date } });
 }
+
+export function createAttendancesSkipExist(
+  rows: Prisma.AttendanceCreateManyInput[],
+) {
+  return prisma.attendance.createMany({
+    data: rows,
+    skipDuplicates: true,
+  });
+}

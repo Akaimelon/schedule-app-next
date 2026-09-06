@@ -4,7 +4,6 @@ import { useAttendances } from "@/hooks/useAttendances";
 import { useChildList } from "@/hooks/useChildList";
 import { BarChartIcon } from "./Icon";
 
-
 const TD = "border-b border-[#f2eee5] px-2 py-3 text-center";
 const TH =
   "text-ink-soft border-b border-[#eee9df] bg-white px-2 py-3 text-center text-[13px] font-semibold whitespace-nowrap";
