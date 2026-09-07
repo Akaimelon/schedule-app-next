@@ -1,11 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { UsersIcon } from "@/components/Icon";
+import { UsersIcon, CopyIcon } from "@/components/Icon";
 import { useUiStore } from "@/stores/useUiStore";
+import { useState } from "react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { useCopyPreviousMonth } from "@/hooks/useCopyPreviousMonth";
 
-export function Header() {
+export function Header({ year, month }: { year: number; month: number }) {
   const openChildModal = useUiStore((s) => s.openChildModal);
+  const [confirming, setConfirming] = useState(false);
+  const copy = useCopyPreviousMonth();
 
   return (
     <header className="mb-5.5 flex items-start justify-between gap-6 max-[980px]:flex-col max-[980px]:items-stretch">
@@ -29,12 +34,31 @@ export function Header() {
       <div className="flex gap-4">
         <button
           className="text-accent inline-flex cursor-pointer items-center gap-2 rounded-xl border-[1.5px] border-[#6ea8dc] bg-white px-4 py-2.75 text-sm font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors duration-120 hover:bg-[#f3f8fd]"
+          onClick={() => setConfirming(true)}
+        >
+          <CopyIcon />
+          先月コピー
+        </button>
+        <button
+          className="text-accent inline-flex cursor-pointer items-center gap-2 rounded-xl border-[1.5px] border-[#6ea8dc] bg-white px-4 py-2.75 text-sm font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors duration-120 hover:bg-[#f3f8fd]"
           onClick={openChildModal}
         >
           <UsersIcon />
           子供管理
         </button>
       </div>
+      {confirming && (
+        <ConfirmDialog
+          title="先月の予定をコピー"
+          message={`先月の予定を${month + 1}月に写します。\n祝日と、既に入っている予定はそのままです。`}
+          confirmLabel="コピーする"
+          onCancel={() => setConfirming(false)}
+          onConfirm={() => {
+            setConfirming(false);
+            copy.mutate({ year, month: month + 1 });
+          }}
+        />
+      )}
     </header>
   );
 }

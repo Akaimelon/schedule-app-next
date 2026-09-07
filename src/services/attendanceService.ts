@@ -5,12 +5,15 @@ import {
   findAttendance,
   updateAttendance,
   countAttendanceByDate,
+  createAttendancesSkipExist,
 } from "@/repositories/attendanceRepository";
 import { findChildById } from "@/repositories/childRepository";
 import { dateToDateStr, dateStrToDate } from "@/lib/date";
 import { Attendance } from "@/types/api";
 import { AttendancePatchInput } from "@/schemas/attendanceSchema";
 import { MAX_PER_DAY } from "@/constants";
+import { fetchHolidays } from "@/lib/holidays";
+import { limitPerDay, mapToTargetMonth } from "@/lib/copyMonth";
 
 function toAttendanceDto(a: {
   date: Date;
@@ -110,4 +113,29 @@ export async function changeAttendanceOptions({
     ok: true,
     attendance: toAttendanceDto(update),
   };
+}
+
+export async function copyPreviousMonth({
+  year,
+  month, 
+}: {
+  year: number;
+  month: number;
+}): Promise<{ copied: number }> {
+
+  const prev = new Date(year, month - 1, 1);
+
+  const sources = await getMonthlyAttendances({
+    year: prev.getFullYear(),
+    month: prev.getMonth(),
+  });
+
+  const holidays = await fetchHolidays(year)
+  const existing = await getMonthlyAttendances({ year, month });
+
+  const rows = mapToTargetMonth(sources, year, month, holidays);
+  const kept = limitPerDay(rows, existing);
+
+  const result = await createAttendancesSkipExist(kept);
+  return { copied: result.count };
 }

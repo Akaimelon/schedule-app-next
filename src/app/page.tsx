@@ -31,7 +31,7 @@ export default async function Home({
         <button type="submit">ログアウト</button>
       </form>
 
-      <Header />
+      <Header year={year} month={month }/>
 
       <div className="flex items-start gap-4 max-[980px]:flex-col">
         <div className="border-line min-w-0 flex-1 rounded-[18px] border bg-white px-3 py-3.5 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">

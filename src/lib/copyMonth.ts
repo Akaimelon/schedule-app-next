@@ -1,9 +1,11 @@
+import { MAX_PER_DAY } from "@/constants";
 import {
   dateStrToLocalDate,
   dateStrToDate,
   toStr,
   getWeekdayOccurrence,
   findNthWeekday,
+  dateToDateStr,
 } from "@/lib/date";
 
 import type { Holidays } from "@/lib/holidays";
@@ -45,4 +47,38 @@ export function mapToTargetMonth(
     });
   }
   return rows;
+}
+
+export function limitPerDay(
+  rows: NewAttendance[],
+  existing: Attendance[],
+): NewAttendance[] {
+  const byDate = new Map<string, Set<number>>();
+  for (const a of existing) {
+    let ids = byDate.get(a.date);
+    if (!ids) {
+      ids = new Set();
+      byDate.set(a.date, ids);
+    }
+    ids.add(a.childId);
+  }
+
+   const kept: NewAttendance[] = [];
+  for (const row of rows) {
+    const key = dateToDateStr(row.date)
+
+    let ids = byDate.get(key);
+    if (!ids) {
+      ids = new Set();
+      byDate.set(key, ids);
+    }
+
+    if (ids.has(row.childId)) continue;   
+    if (ids.size >= MAX_PER_DAY) continue;   
+
+    ids.add(row.childId);
+    kept.push(row);
+  }
+
+  return kept;
 }
