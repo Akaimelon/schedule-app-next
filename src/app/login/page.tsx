@@ -17,13 +17,13 @@ export default function LoginPage() {
           ひまわり予定表
         </h1>
         <p className="text-ink-muted mt-2 text-sm">
-          続けるには GitHub でログインしてください
+          続けるには Google でログインしてください
         </p>
 
         <form
           action={async () => {
             "use server";
-            await signIn("github");
+            await signIn("google");
           }}
           className="mt-7"
         >
@@ -31,7 +31,7 @@ export default function LoginPage() {
             type="submit"
             className="bg-accent w-full cursor-pointer rounded-xl px-4 py-3 font-semibold text-white transition-colors duration-120 hover:bg-[#3f76ae]"
           >
-            GitHub でログイン
+            Google でログイン
           </button>
         </form>
       </div>
