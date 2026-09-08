@@ -1,0 +1,21 @@
+[Unit]
+Description=schedule-next
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/opt/schedule-app
+EnvironmentFile=/opt/schedule-app/.env.production
+ExecStart=/usr/bin/node /opt/schedule-app/.next/standalone/server.js
+
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=HOSTNAME=127.0.0.1
+
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
