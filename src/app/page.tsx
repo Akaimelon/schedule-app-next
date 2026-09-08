@@ -21,15 +21,23 @@ export default async function Home({
 
   return (
     <div className="mx-auto w-[min(98.8vw,1540px)] px-3 pt-6 pb-7">
-      {session.user?.name}
-      <form
-        action={async () => {
-          "use server";
-          await signOut();
-        }}
-      >
-        <button type="submit">ログアウト</button>
-      </form>
+      <div className="mb-3 flex items-center justify-end gap-3">
+        <span className="text-ink-muted text-sm">{session.user?.name}</span>
+
+        <form
+          action={async () => {
+            "use server";
+            await signOut();
+          }}
+        >
+          <button
+            type="submit"
+            className="text-ink-soft hover:text-ink cursor-pointer text-sm underline"
+          >
+            ログアウト
+          </button>
+        </form>
+      </div>
 
       <Header year={year} month={month} />
 

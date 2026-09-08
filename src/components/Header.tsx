@@ -12,6 +12,15 @@ export function Header({ year, month }: { year: number; month: number }) {
   const [confirming, setConfirming] = useState(false);
   const copy = useCopyPreviousMonth();
 
+  const BASE_BTN =
+    "inline-flex cursor-pointer items-center gap-2 rounded-xl bg-white px-4 py-2.75 text-sm shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors duration-120";
+
+  const SOFT_BTN =
+    "border-line-btn border font-medium text-[#56524b] hover:border-[#e0d9cc] hover:bg-[#fbf8f2]";
+
+  const PRIMARY_BTN =
+    "text-accent border-[1.5px] border-[#6ea8dc] font-semibold hover:bg-[#f3f8fd]";
+
   return (
     <header className="mb-5.5 flex items-start justify-between gap-6 max-[980px]:flex-col max-[980px]:items-stretch">
       <div className="flex items-center gap-4">
@@ -33,14 +42,14 @@ export function Header({ year, month }: { year: number; month: number }) {
       </div>
       <div className="flex gap-4">
         <button
-          className="text-accent inline-flex cursor-pointer items-center gap-2 rounded-xl border-[1.5px] border-[#6ea8dc] bg-white px-4 py-2.75 text-sm font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors duration-120 hover:bg-[#f3f8fd]"
+          className={`${BASE_BTN} ${SOFT_BTN}`}
           onClick={() => setConfirming(true)}
         >
           <CopyIcon />
           先月コピー
         </button>
         <button
-          className="text-accent inline-flex cursor-pointer items-center gap-2 rounded-xl border-[1.5px] border-[#6ea8dc] bg-white px-4 py-2.75 text-sm font-semibold shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition-colors duration-120 hover:bg-[#f3f8fd]"
+          className={`${BASE_BTN} ${PRIMARY_BTN}`}
           onClick={openChildModal}
         >
           <UsersIcon />

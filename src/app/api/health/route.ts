@@ -15,7 +15,10 @@ export async function GET() {
     });
   } catch (error) {
     return Response.json(
-      { ok: false, error: error instanceof Error ? error.message : "DBに接続できません" },
+      {
+        ok: false,
+        error: error instanceof Error ? error.message : "DBに接続できません",
+      },
       {
         status: 503,
       },
