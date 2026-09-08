@@ -1,0 +1,18 @@
+# 依存はコンテナ内で入れ直す（Windows用バイナリを持ち込まない）
+node_modules
+
+# ローカルのビルド結果
+.next
+
+# 秘密
+.env
+.env.*
+
+# 開発用・イメージに不要
+.git
+.github
+.vscode
+.idea
+README.md
+*.md
+npm-debug.log*

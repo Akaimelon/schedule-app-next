@@ -63,9 +63,9 @@ export function limitPerDay(
     ids.add(a.childId);
   }
 
-   const kept: NewAttendance[] = [];
+  const kept: NewAttendance[] = [];
   for (const row of rows) {
-    const key = dateToDateStr(row.date)
+    const key = dateToDateStr(row.date);
 
     let ids = byDate.get(key);
     if (!ids) {
@@ -73,8 +73,8 @@ export function limitPerDay(
       byDate.set(key, ids);
     }
 
-    if (ids.has(row.childId)) continue;   
-    if (ids.size >= MAX_PER_DAY) continue;   
+    if (ids.has(row.childId)) continue;
+    if (ids.size >= MAX_PER_DAY) continue;
 
     ids.add(row.childId);
     kept.push(row);

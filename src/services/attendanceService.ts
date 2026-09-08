@@ -117,12 +117,11 @@ export async function changeAttendanceOptions({
 
 export async function copyPreviousMonth({
   year,
-  month, 
+  month,
 }: {
   year: number;
   month: number;
 }): Promise<{ copied: number }> {
-
   const prev = new Date(year, month - 1, 1);
 
   const sources = await getMonthlyAttendances({
@@ -130,7 +129,7 @@ export async function copyPreviousMonth({
     month: prev.getMonth(),
   });
 
-  const holidays = await fetchHolidays(year)
+  const holidays = await fetchHolidays(year);
   const existing = await getMonthlyAttendances({ year, month });
 
   const rows = mapToTargetMonth(sources, year, month, holidays);
