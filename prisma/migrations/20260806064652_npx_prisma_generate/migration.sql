@@ -1,2 +1,2 @@
 -- AlterTable
-ALTER TABLE `child` ADD COLUMN `defaultTimeFrame` ENUM('AM', 'PM') NULL;
+ALTER TABLE `Child` ADD COLUMN `defaultTimeFrame` ENUM('AM', 'PM') NULL;
