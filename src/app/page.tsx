@@ -1,10 +1,10 @@
 import { auth, signOut } from "@/auth";
-import { redirect } from "next/navigation";
 import { DayModal } from "@/components/DayModal";
 import Calendar from "@/components/Calendar";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
 import { ChildManageModal } from "@/components/ChildManageModal";
+import { Landing } from "@/components/Landing";
 
 export default async function Home({
   searchParams,
@@ -12,7 +12,7 @@ export default async function Home({
   searchParams: Promise<{ year?: string; month?: string }>;
 }) {
   const session = await auth();
-  if (!session) redirect("/login");
+  if (!session) return <Landing />;
 
   const params = await searchParams;
   const now = new Date();

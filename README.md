@@ -27,3 +27,27 @@
 | CI/CD | GitHub Actions |
 | テスト | Vitest |
 | インフラ | AWS EC2 (Ubuntu 24.04) / nginx / systemd / Let's Encrypt |
+
+```mermaid
+flowchart TB
+    User["ブラウザ"]
+    Google["Google OAuth"]
+    Holidays["holidays-jp API<br/>（祝日）"]
+
+    subgraph AWS["AWS ap-northeast-1"]
+        subgraph SG["Security Group: 22（自宅IPのみ）/ 80 / 443"]
+            subgraph EC2["EC2 t3.small — Ubuntu 24.04"]
+                Nginx["nginx<br/>TLS終端 / Let's Encrypt"]
+                App["Next.js<br/>systemd: schedule-app<br/>127.0.0.1:3000"]
+                DB[("MySQL 8.0<br/>bind-address: 127.0.0.1")]
+            end
+        end
+    end
+
+    User -->|HTTPS 443| Nginx
+    Nginx -->|proxy_pass| App
+    App -->|localhost:3306| DB
+    User -->|ログイン| Google
+    App -->|認可コード交換| Google
+    App --> Holidays
+```
