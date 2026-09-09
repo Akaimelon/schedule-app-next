@@ -1,7 +1,12 @@
 import Image from "next/image";
-import { signIn } from "@/auth";
+import { auth, signIn } from "@/auth";
+import { redirect } from "next/navigation";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await auth();
+
+  if (session) redirect("/");
+
   return (
     <main className="flex flex-1 items-center justify-center px-4">
       <div className="border-line w-full max-w-sm rounded-[18px] border bg-white px-8 py-10 text-center shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
@@ -23,7 +28,7 @@ export default function LoginPage() {
         <form
           action={async () => {
             "use server";
-            await signIn("google");
+            await signIn("google", { redirectTo: "/" });
           }}
           className="mt-7"
         >
