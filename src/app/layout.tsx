@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
-import { M_PLUS_Rounded_1c } from "next/font/google";
+import "@fontsource/m-plus-rounded-1c/400.css";
+import "@fontsource/m-plus-rounded-1c/500.css";
+import "@fontsource/m-plus-rounded-1c/700.css";
+import "@fontsource/m-plus-rounded-1c/800.css";
 import { Providers } from "@/components/Providers";
 import "./globals.css";
-
-const rounded = M_PLUS_Rounded_1c({
-  weight: ["400", "500", "700", "800"],
-  preload: false,
-  display: "swap",
-  variable: "--font-rounded",
-});
 
 export const metadata: Metadata = {
   title: "ひまわり予定表",
@@ -21,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className={`${rounded.variable} h-full antialiased`}>
+    <html lang="ja" className="h-full antialiased">
       <body className="flex min-h-full flex-col">
         <Providers>{children}</Providers>
       </body>

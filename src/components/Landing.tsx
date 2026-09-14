@@ -35,10 +35,6 @@ export function Landing() {
             Google でログイン
           </button>
         </form>
-
-        <p className="text-ink-muted mt-3 text-[13px]">
-          ご利用には管理者の承認が必要です
-        </p>
       </div>
 
       <div className="border-line mt-14 overflow-hidden rounded-[18px] border bg-white shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
@@ -70,7 +66,7 @@ export function Landing() {
         <div className="border-line rounded-[18px] border bg-white px-5 py-6 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
           <div className="text-ink-strong font-semibold">利用状況の集計</div>
           <p className="text-ink-soft mt-2 text-sm leading-relaxed">
-            契約日数に対する利用日数と残り日数を、その月のぶんだけ自動で計算します。超過した子は赤字で表示されます。
+            契約日数に対する利用日数と残り日数を、その月の分を自動で計算します。超過した子は赤字で表示されます。
           </p>
         </div>
       </div>

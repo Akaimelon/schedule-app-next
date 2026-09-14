@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { UsersIcon, CopyIcon } from "@/components/Icon";
+import { UsersIcon, CopyIcon, PrintIcon } from "@/components/Icon";
 import { useUiStore } from "@/stores/useUiStore";
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -41,6 +41,14 @@ export function Header({ year, month }: { year: number; month: number }) {
         </div>
       </div>
       <div className="flex gap-4">
+        <button
+          className={`${BASE_BTN} ${SOFT_BTN}`}
+          onClick={() => window.print()}
+        >
+          <PrintIcon />
+          印刷
+        </button>
+
         <button
           className={`${BASE_BTN} ${SOFT_BTN}`}
           onClick={() => setConfirming(true)}
